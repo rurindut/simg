@@ -12,4 +12,9 @@ class Organization extends Model
     {
         return $this->hasMany(User::class);
     }
+
+    public function regions(): HasMany
+    {
+        return $this->hasMany(Region::class);
+    }
 }
