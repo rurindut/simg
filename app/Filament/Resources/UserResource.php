@@ -16,6 +16,8 @@ use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
 use Filament\Forms\Components\Select;
 use BezhanSalleh\FilamentShield\Support\Utils;
+use Filament\Tables\Actions\RestoreAction;
+use Filament\Tables\Actions\ForceDeleteAction;
 
 class UserResource extends Resource
 {
@@ -99,16 +101,18 @@ class UserResource extends Resource
                     ->dateTime(),
                 
                 Tables\Columns\TextColumn::make('organization.name')
-                ->label('Organisasi')
-                ->visible(fn () => auth()->user()?->hasRole('super_admin'))
-                ->sortable()
-                ->searchable(),
+                    ->label('Organisasi')
+                    ->visible(fn () => auth()->user()?->hasRole('super_admin'))
+                    ->sortable()
+                    ->searchable(),
             ])
             ->filters([
-                // Tables\Filters\TrashedFilter::make(),
+                Tables\Filters\TrashedFilter::make(),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                RestoreAction::make(),
+                ForceDeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -133,20 +137,12 @@ class UserResource extends Resource
         ];
     }
 
-    // public static function shouldRegisterNavigation(): bool
-    // {
-    //     $user = auth()->user();
-
-    //     if ($user->hasRole('super_admin')) {
-    //         return true;
-    //     }
-
-    //     return $user->can('create') || $user->can('update');
-    // }
-
     public static function getEloquentQuery(): Builder
     {
-        $query = parent::getEloquentQuery();
+        $query = parent::getEloquentQuery()
+            ->withoutGlobalScopes([
+                SoftDeletingScope::class,
+            ]);
 
         $user = auth()->user();
 
