@@ -36,7 +36,15 @@ class UserPolicy
      */
     public function update(User $user, User $model): bool
     {
-        return $user->is_super_admin || $user->can('update_user');
+        if ($user->is_super_admin) {
+            return true;
+        }
+
+        if ($user->organization_id !== $model->organization_id) {
+            return false;
+        }
+        
+        return $user->can('update_user');
     }
 
     /**
@@ -44,7 +52,19 @@ class UserPolicy
      */
     public function delete(User $user, User $model): bool
     {
-        return $user->is_super_admin || $user->can('delete_user');
+        if ($user->id === $model->id) {
+            return false;
+        }
+
+        if ($user->is_super_admin) {
+            return true;
+        }
+
+        if ($user->organization_id !== $model->organization_id) {
+            return false;
+        }
+
+        return $user->can('delete_user');
     }
 
     public function deleteAny(User $user): bool
@@ -57,7 +77,19 @@ class UserPolicy
      */
     public function restore(User $user, User $model): bool
     {
-        return $user->is_super_admin || $user->can('{{ Restore }}');
+        if ($user->id === $model->id) {
+            return false;
+        }
+
+        if ($user->is_super_admin) {
+            return true;
+        }
+
+        if ($user->organization_id !== $model->organization_id) {
+            return false;
+        }
+
+        return $user->can('{{ Restore }}');
     }
 
     /**
@@ -65,6 +97,18 @@ class UserPolicy
      */
     public function forceDelete(User $user, User $model): bool
     {
-        return $user->is_super_admin || $user->can('{{ ForceDelete }}');
+        if ($user->id === $model->id) {
+            return false;
+        }
+
+        if ($user->is_super_admin) {
+            return true;
+        }
+
+        if ($user->organization_id !== $model->organization_id) {
+            return false;
+        }
+
+        return $user->can('{{ ForceDelete }}');
     }
 }
