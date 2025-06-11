@@ -93,4 +93,15 @@ class RegionResource extends Resource
     public static function getModelLabel(): string {
         return 'Wilayah';
     }
+
+    public static function getEloquentQuery(): Builder
+    {
+        $query = parent::getEloquentQuery();
+
+        if (!auth()->user()->is_super_admin) {
+            $query->where('organization_id', auth()->user()->organization_id);
+        }
+
+        return $query;
+    }
 }

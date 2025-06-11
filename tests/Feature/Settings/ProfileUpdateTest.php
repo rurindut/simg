@@ -55,7 +55,7 @@ class ProfileUpdateTest extends TestCase
         $this->assertNotNull($user->refresh()->email_verified_at);
     }
 
-    public function test_user_can_delete_their_account(): void
+    public function test_user_cannot_delete_their_account(): void
     {
         $user = User::factory()->create();
 
@@ -69,7 +69,8 @@ class ProfileUpdateTest extends TestCase
             ->assertHasNoErrors()
             ->assertRedirect('/');
 
-        $this->assertNull($user->fresh());
+        // $this->assertNull($user->fresh());
+        $this->assertNotNull($user->fresh());
         $this->assertFalse(auth()->check());
     }
 

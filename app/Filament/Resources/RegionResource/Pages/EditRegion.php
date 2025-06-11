@@ -16,4 +16,13 @@ class EditRegion extends EditRecord
             Actions\DeleteAction::make(),
         ];
     }
+
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        if (!auth()->user()->is_super_admin) {
+            unset($data['organization_id']);
+        }
+
+        return $data;
+    }
 }
