@@ -18,12 +18,15 @@ use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Unique;
+use Spatie\Permission\Models\Role;
+use Illuminate\Database\Eloquent\Builder;
 
 class RoleResource extends Resource implements HasShieldPermissions
 {
     use HasShieldFormComponents;
 
     protected static ?string $recordTitleAttribute = 'name';
+    protected static ?string $model = Role::class;
 
     public static function getPermissionPrefixes(): array
     {
@@ -133,6 +136,12 @@ class RoleResource extends Resource implements HasShieldPermissions
         ];
     }
 
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->where('name', '!=', 'super_admin');
+    }
+
     public static function getPages(): array
     {
         return [
@@ -171,7 +180,7 @@ class RoleResource extends Resource implements HasShieldPermissions
     public static function getNavigationGroup(): ?string
     {
         return Utils::isResourceNavigationGroupEnabled()
-            ? __('filament-shield::filament-shield.nav.group')
+            ? __('Pengguna & Akses')
             : '';
     }
 
