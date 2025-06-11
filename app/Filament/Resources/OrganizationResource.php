@@ -157,13 +157,13 @@ class OrganizationResource extends Resource
         return $query;
     }
 
-    // public static function canViewAny(): bool
-    // {
-    //     return auth()->user()->hasRole('super_admin');
-    // }
+    public static function getNavigationGroup(): ?string
+    {
+        return __('Pengaturan');
+    }
+
     public static function canEdit(Model $record): bool
     {
-        Log::debug('masuk sini',[$record->id]);
         if (auth()->user()->hasRole('super_admin')) return true;
 
         return $record->id === auth()->user()->organization_id;
