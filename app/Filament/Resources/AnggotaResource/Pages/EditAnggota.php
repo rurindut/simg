@@ -9,19 +9,20 @@ use Filament\Resources\Pages\EditRecord;
 class EditAnggota extends EditRecord
 {
     protected static string $resource = AnggotaResource::class;
+    protected static string $view = 'filament.resources.anggota-resource.pages.edit';
 
     protected function getHeaderActions(): array
     {
         return [
-            Actions\Action::make('data_baptis')
-                ->label('Data Baptis')
-                ->url(fn () => route('filament.admin.resources.anggota.edit-baptis', ['record' => $this->record])),
+            // Actions\Action::make('data_baptis')
+            //     ->label('Data Baptis')
+            //     ->url(fn () => route('filament.admin.resources.anggota.edit-baptis', ['record' => $this->record])),
             
             // Actions\Action::make('data_atestasi')
             //     ->label('Data Atestasi')
             //     ->url(fn () => route('filament.admin.resources.anggota.edit-atestasi', ['record' => $this->record])),
             
-            Actions\DeleteAction::make(),
+            // Actions\DeleteAction::make(),
         ];
     }
 

@@ -28,7 +28,7 @@ use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\Hidden;
 
-use App\Filament\Resources\AnggotaResource\RelationManagers\BaptisRelationManager;
+// use App\Filament\Resources\AnggotaResource\RelationManagers\BaptisRelationManager;
 
 class AnggotaResource extends Resource
 {
@@ -129,7 +129,7 @@ class AnggotaResource extends Resource
             // 'edit' => Pages\EditAnggota::route('/{record}/edit'),
             'edit' => Pages\EditAnggota::route('/{record}/edit/data-pribadi'),
             'edit-baptis' => Pages\EditAnggotaBaptis::route('/{record}/edit/data-baptis'),
-            // 'edit-atestasi' => Pages\EditAnggotaAtestasi::route('/{record}/edit/data-atestasi'),
+            'edit-atestasi' => Pages\EditAnggotaAtestasi::route('/{record}/edit/data-atestasi'),
         ];
     }
 
@@ -170,7 +170,7 @@ class AnggotaResource extends Resource
     {
         $user = auth()->user();
         $isSuperAdmin = auth()->user()?->is_super_admin;
-        Log::debug($user);
+        // Log::debug($user);
 
         return [
         Section::make()
@@ -369,39 +369,39 @@ class AnggotaResource extends Resource
             // ->schema([
                 Select::make('tipe')
                     ->options([
-                        'keluar' => 'Keluar',
                         'masuk' => 'Masuk',
+                        'keluar' => 'Keluar',
                     ])
                     ->required(),
 
                 DatePicker::make('tanggal')
-                    ->label('Tanggal Atestasi'),
+                    ->label('Tanggal Atestasi')
+                    ->required(),
 
                 TextInput::make('gereja_dari')
                     ->label('Gereja Dari')
-                    ->columnSpanFull(),
+                    ->required(),
 
                 Textarea::make('alamat_asal')
                     ->label('Alamat Dari')
                     ->rows(2)
-                    ->columnSpanFull(),
+                    ->required(),
 
                 TextInput::make('gereja_tujuan')
                     ->label('Gereja Tujuan')
-                    ->columnSpanFull(),
+                    ->required(),
 
                 Textarea::make('alamat_tujuan')
                     ->label('Alamat Tujuan')
-                    ->rows(2)
-                    ->columnSpanFull(),
+                    ->required()
+                    ->rows(2),
 
                 TextInput::make('nomor_surat')
                     ->label('Nomor Surat'),
 
                 Textarea::make('alasan')
                     ->label('Alasan')
-                    ->rows(3)
-                    ->columnSpanFull(),
+                    ->rows(3),
             // ]
             // )
             // ->defaultItems(0)

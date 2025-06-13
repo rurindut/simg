@@ -32,7 +32,7 @@ class Anggota extends Model
 
     public function atestasis()
     {
-        return $this->hasMany(Atestasi::class);
+        return $this->hasMany(Atestasi::class, 'anggota_id');
     }
 
     public function orangtuas()

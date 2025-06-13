@@ -139,7 +139,7 @@ class EditAnggotaBaptis extends Page implements HasForms
 
         if ($isAnakValid || $isSidiValid) {
             Notification::make()
-                ->title('Success')
+                ->title('Saved')
                 ->success()
                 ->send();
         } else {
@@ -155,7 +155,7 @@ class EditAnggotaBaptis extends Page implements HasForms
     protected function getActions(): array
     {
         return [
-            Actions\Action::make('Simpan')->action('save'),
+            // Actions\Action::make('Simpan')->action('save'),
         ];
     }
 
