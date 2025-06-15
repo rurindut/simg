@@ -60,8 +60,6 @@ class AnggotaMeninggalResource extends Resource
     {
         return [
             'index' => Pages\ListAnggotaMeninggals::route('/'),
-            // 'create' => Pages\CreateAnggotaMeninggal::route('/create'),
-            // 'edit' => Pages\EditAnggotaMeninggal::route('/{record}/edit'),
         ];
     }
 

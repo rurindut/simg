@@ -28,8 +28,6 @@ use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\Hidden;
 
-// use App\Filament\Resources\AnggotaResource\RelationManagers\BaptisRelationManager;
-
 class AnggotaResource extends Resource
 {
     protected static ?string $model = Anggota::class;
@@ -75,7 +73,7 @@ class AnggotaResource extends Resource
                     ->getStateUsing(function ($record) {
                         $pasangan = optional($record->pasangan)?->nama;
                         $jumlahAnak = $record->anaks()->count();
-                        return ($pasangan ? $pasangan->count() : 0) + $jumlahAnak;//trim('Pasangan: '.($pasangan ?? '-') . ' | Anak: ' . $jumlahAnak);
+                        return ($pasangan ? 1 : 0) + $jumlahAnak;
                     }),
 
                 TextColumn::make('usia')
@@ -105,10 +103,11 @@ class AnggotaResource extends Resource
                 //
             ])
             ->actions([
+                Tables\Actions\ViewAction::make()->label('Detail'),
                 Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
@@ -130,6 +129,9 @@ class AnggotaResource extends Resource
             'edit' => Pages\EditAnggota::route('/{record}/edit/data-pribadi'),
             'edit-baptis' => Pages\EditAnggotaBaptis::route('/{record}/edit/data-baptis'),
             'edit-atestasi' => Pages\EditAnggotaAtestasi::route('/{record}/edit/data-atestasi'),
+            'edit-keluarga' => Pages\EditAnggotaKeluarga::route('/{record}/edit/data-keluarga'),
+            'edit-aktivitas' => Pages\EditAnggotaAktivitas::route('/{record}/edit/data-aktivitas'),
+            'view' => Pages\ViewAnggota::route('/{record}'),
         ];
     }
 
@@ -300,8 +302,8 @@ class AnggotaResource extends Resource
         ])->columns(2),
         Section::make()
             ->schema([
-            FileUpload::make('foto_anda')->image(),
-            FileUpload::make('foto_keluarga')->image(),
+            FileUpload::make('foto_anda')->image()->directory('anggota'),
+            FileUpload::make('foto_keluarga')->image()->directory('anggota-keluarga'),
         ])->columns(2)
         ];
     }
@@ -361,52 +363,193 @@ class AnggotaResource extends Resource
     public static function dataAtestasiForm(): array
     {
         return [
-            // Repeater::make('atestasis')
-            // ->relationship()
-            // // ->label('Riwayat Atestasi')
-            // ->createItemButtonLabel('Tambah Atestasi')
-            // ->columns(2)
-            // ->schema([
-                Select::make('tipe')
-                    ->options([
-                        'masuk' => 'Masuk',
-                        'keluar' => 'Keluar',
+            Select::make('tipe')
+                ->options([
+                    'masuk' => 'Masuk',
+                    'keluar' => 'Keluar',
+                ])
+                ->required(),
+
+            DatePicker::make('tanggal')
+                ->label('Tanggal Atestasi')
+                ->required(),
+
+            TextInput::make('gereja_dari')
+                ->label('Gereja Dari')
+                ->required(),
+
+            Textarea::make('alamat_asal')
+                ->label('Alamat Dari')
+                ->rows(2)
+                ->required(),
+
+            TextInput::make('gereja_tujuan')
+                ->label('Gereja Tujuan')
+                ->required(),
+
+            Textarea::make('alamat_tujuan')
+                ->label('Alamat Tujuan')
+                ->required()
+                ->rows(2),
+
+            TextInput::make('nomor_surat')
+                ->label('Nomor Surat'),
+
+            Textarea::make('alasan')
+                ->label('Alasan')
+                ->rows(3),
+        ];
+    }
+
+    public static function dataKeluargaForm(): array
+    {
+        return [
+            Section::make('Data Orang Tua')
+                ->schema([
+                    Hidden::make('ayah.id'),
+                    Hidden::make('ayah.hubungan')->default('ayah'),
+                    TextInput::make('ayah.nia')
+                        ->label('NIA Ayah'),
+                    TextInput::make('ayah.nama')
+                        ->label('Nama Ayah'),
+                
+                    Hidden::make('ibu.id'),
+                    Hidden::make('ibu.hubungan')->default('ibu'),
+                    TextInput::make('ibu.nia')
+                        ->label('NIA Ibu'),
+                    TextInput::make('ibu.nama')
+                        ->label('Nama Ibu'),
+                ])
+                ->columns(2),
+
+            Section::make('Data Pasangan')
+                ->schema([
+                    TextInput::make('pasangan.nia')
+                        ->label('NIA Pasangan'),
+                    TextInput::make('pasangan.nama')
+                        ->label('Nama Pasangan'),
+                    TextInput::make('pasangan.no_akta_nikah')
+                        ->label('No. Akta Nikah'),
+                    DatePicker::make('pasangan.tanggal_catatan_sipil')
+                        ->label('Tanggal Catatan Sipil'),
+                    TextInput::make('pasangan.tempat_catatan_sipil')
+                        ->label('Tempat Catatan Sipil'),
+                    TextInput::make('pasangan.no_piagam')
+                        ->label('No. Piagam'),
+                    DatePicker::make('pasangan.tanggal_pemberkatan')
+                        ->label('Tanggal Pemberkatan'),
+                    TextInput::make('pasangan.pendeta')
+                        ->label('Pendeta'),
+                    TextInput::make('pasangan.gereja')
+                        ->label('Gereja'),
+                    Textarea::make('pasangan.alamat_gereja')
+                        ->label('Alamat Gereja'),
+                    FileUpload::make('pasangan.akta_catatan_sipil')
+                        ->label('Akta Catatan Sipil')
+                        ->image()
+                        ->directory('akta-catatan-sipil'),
+                    FileUpload::make('pasangan.piagam_pemberkatan')
+                        ->label('Piagam Pemberkatan')
+                        ->image()
+                        ->directory('akta-catatan-sipil'),
+                ])
+                ->columns(2),
+
+            Section::make('anaks')
+                ->label('Data Anak')
+                ->schema([
+                    Repeater::make('anaks')
+                        ->label('Anak')
+                        ->relationship('anaks')
+                        ->schema([
+                            TextInput::make('nia')
+                                ->label('NIA')
+                                ->columnSpan(1),
+                            TextInput::make('nama')
+                                ->label('Nama')->required()
+                                ->columnSpan(1),
+                            TextInput::make('tempat_lahir')
+                                ->label('Tempat Lahir')
+                                ->columnSpan(1),
+                            DatePicker::make('tanggal_lahir')
+                                ->label('Tanggal Lahir')
+                                ->columnSpan(1),
+                            Select::make('jenis_kelamin')
+                                ->options([
+                                    'Laki-laki' => 'Laki-laki',
+                                    'Perempuan' => 'Perempuan',
+                                ])->required()
+                                ->columnSpan(1),
+                            TextInput::make('jemaat')
+                                ->label('Jemaat')
+                                ->columnSpan(1),
+                            Textarea::make('alamat')
+                                ->label('Alamat')
+                                ->columnSpan(2),
+                            // Textarea::make('keterangan')
+                            //     ->label('Keterangan')
+                            //     ->columnSpan(2),
+                        ])
+                        ->defaultItems(0)
+                        ->reorderable()
+                        ->addActionLabel('Tambah Anak')
+                        ->columns(4),
+                ])
+                ->collapsible(),            
+        ];
+    }
+
+    public static function dataActivitasForm(): array
+    {
+        return [
+        Section::make('Pengalaman Aktivitas Gerejawi')
+            ->schema([
+                Repeater::make('pengalamanGerejawis')
+                    ->label('')
+                    ->relationship('pengalamanGerejawis')
+                    ->defaultItems(0)
+                    ->schema([
+                        TextInput::make('bidang')->required()->label('Bidang Pelayanan / Lembaga / Komisi'),
+                        TextInput::make('jabatan')->required()->label('Jabatan / Keterangan Tugas'),
+                        TextInput::make('tahun_mulai')->numeric(),
+                        TextInput::make('tahun_selesai')->numeric(),
                     ])
-                    ->required(),
+                    ->columns(2),
+            ]),
+        
+        Section::make('Aktivitas Sosial')
+            ->schema([
+                Repeater::make('aktivitasSosials')
+                    ->label('')
+                    ->relationship('aktivitasSosials')
+                    ->defaultItems(0)
+                    ->schema([
+                        TextInput::make('organisasi')->required(),
+                        TextInput::make('kegiatan')->required(),
+                        TextInput::make('jabatan')->required(),
+                        TextInput::make('tahun_mulai')->numeric(),
+                        TextInput::make('tahun_selesai')->numeric(),
+                    ])
+                    ->columns(2),
+            ]),
 
-                DatePicker::make('tanggal')
-                    ->label('Tanggal Atestasi')
-                    ->required(),
-
-                TextInput::make('gereja_dari')
-                    ->label('Gereja Dari')
-                    ->required(),
-
-                Textarea::make('alamat_asal')
-                    ->label('Alamat Dari')
-                    ->rows(2)
-                    ->required(),
-
-                TextInput::make('gereja_tujuan')
-                    ->label('Gereja Tujuan')
-                    ->required(),
-
-                Textarea::make('alamat_tujuan')
-                    ->label('Alamat Tujuan')
-                    ->required()
-                    ->rows(2),
-
-                TextInput::make('nomor_surat')
-                    ->label('Nomor Surat'),
-
-                Textarea::make('alasan')
-                    ->label('Alasan')
-                    ->rows(3),
-            // ]
-            // )
-            // ->defaultItems(0)
-            // ->collapsible()
-            // ->grid(2)
+        Section::make('Pekerjaan')
+            ->schema([
+                Repeater::make('pekerjaans')
+                    ->label('')
+                    ->relationship('pekerjaans')
+                    ->defaultItems(0)
+                    ->schema([
+                        TextInput::make('profesi')->required(),
+                        TextInput::make('kantor')->label('Nama Kantor')->required(),
+                        Textarea::make('alamat')->nullable(),
+                        TextInput::make('bagian')->nullable(),
+                        TextInput::make('jabatan')->nullable(),
+                        TextInput::make('tahun_mulai')->numeric(),
+                        TextInput::make('tahun_selesai')->numeric(),
+                    ])
+                    ->columns(2),
+            ])
         ];
     }
 }

@@ -14,15 +14,7 @@ class EditAnggota extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            // Actions\Action::make('data_baptis')
-            //     ->label('Data Baptis')
-            //     ->url(fn () => route('filament.admin.resources.anggota.edit-baptis', ['record' => $this->record])),
-            
-            // Actions\Action::make('data_atestasi')
-            //     ->label('Data Atestasi')
-            //     ->url(fn () => route('filament.admin.resources.anggota.edit-atestasi', ['record' => $this->record])),
-            
-            // Actions\DeleteAction::make(),
+            // 
         ];
     }
 
@@ -34,5 +26,13 @@ class EditAnggota extends EditRecord
     public function getTitle(): string
     {
         return 'Data Pribadi';
+    }
+
+    public function getBreadcrumbs(): array
+    {
+        return [
+            AnggotaResource::getUrl('index') => 'Anggota',
+            url()->current() => 'Data Pribadi',
+        ];
     }
 }

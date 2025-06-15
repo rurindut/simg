@@ -63,8 +63,6 @@ class AnggotaAtestasiResource extends Resource
     {
         return [
             'index' => Pages\ListAnggotaAtestasis::route('/'),
-            // 'create' => Pages\CreateAnggotaAtestasi::route('/create'),
-            // 'edit' => Pages\EditAnggotaAtestasi::route('/{record}/edit'),
         ];
     }
 

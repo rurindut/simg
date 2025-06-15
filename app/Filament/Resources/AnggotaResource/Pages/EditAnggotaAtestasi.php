@@ -5,8 +5,8 @@ namespace App\Filament\Resources\AnggotaResource\Pages;
 use App\Filament\Resources\AnggotaResource;
 use App\Models\Anggota;
 use App\Models\Atestasi;
-// use Filament\Actions;
-// use Filament\Tables\Table;
+use Filament\Actions;
+use Filament\Tables\Table;
 use Filament\Resources\Pages\Page;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
@@ -41,7 +41,6 @@ class EditAnggotaAtestasi extends Page implements HasTable, HasForms
     {
         return [
             AnggotaResource::getUrl('index') => 'Anggota',
-            AnggotaResource::getUrl('edit', ['record' => $this->record]) => 'Data Pribadi',
             url()->current() => 'Data Atestasi',
         ];
     }

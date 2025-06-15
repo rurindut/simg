@@ -79,8 +79,6 @@ class UltahKelahiranResource extends Resource
     {
         return [
             'index' => Pages\ListUltahKelahirans::route('/'),
-            // 'create' => Pages\CreateUltahKelahiran::route('/create'),
-            // 'edit' => Pages\EditUltahKelahiran::route('/{record}/edit'),
         ];
     }
 

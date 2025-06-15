@@ -40,6 +40,16 @@ class Anggota extends Model
         return $this->hasMany(OrangTua::class);
     }
 
+    public function ayah()
+    {
+        return $this->hasOne(OrangTua::class)->where('hubungan', 'ayah');
+    }
+
+    public function ibu()
+    {
+        return $this->hasOne(OrangTua::class)->where('hubungan', 'ibu');
+    }
+
     public function pasangan()
     {
         return $this->hasOne(Pasangan::class);

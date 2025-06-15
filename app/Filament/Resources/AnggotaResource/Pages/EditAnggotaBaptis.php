@@ -41,25 +41,9 @@ class EditAnggotaBaptis extends Page implements HasForms
     {
         return [
             AnggotaResource::getUrl('index') => 'Anggota',
-            AnggotaResource::getUrl('edit', ['record' => $this->record]) => 'Data Pribadi',
             url()->current() => 'Data Baptis',
         ];
     }
-
-    // protected function getFormSchema(): array
-    // {
-    //     return AnggotaResource::dataBaptisForm();
-    // }
-
-    // protected function getFormModel(): Anggota
-    // {
-    //     return $this->anggota;
-    // }
-
-    // protected function getFormStatePath(): string
-    // {
-    //     return 'data';
-    // }
 
     public function form(Form $form): Form
     {
@@ -155,7 +139,7 @@ class EditAnggotaBaptis extends Page implements HasForms
     protected function getActions(): array
     {
         return [
-            // Actions\Action::make('Simpan')->action('save'),
+            // 
         ];
     }
 

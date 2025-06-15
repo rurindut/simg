@@ -52,8 +52,6 @@ class UltahPernikahanResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        // $query = parent::getEloquentQuery();
-
         $start = Carbon::now()->startOfWeek(Carbon::MONDAY);
         $end = Carbon::now()->endOfWeek(Carbon::SUNDAY);
 
@@ -61,19 +59,6 @@ class UltahPernikahanResource extends Resource
             ->whereNotNull('tanggal_pemberkatan')
             ->whereRaw('DATE_FORMAT(tanggal_pemberkatan, "%m-%d") BETWEEN ? AND ?', [$start, $end])
             ->get();
-            
-        // $query->whereHas('pasangan', function ($q) use ($start, $end) {
-        //     $q->whereNotNull('tanggal_pemberkatan')
-        //       ->whereRaw('DATE_FORMAT(tanggal_pemberkatan, "%m-%d") BETWEEN ? AND ?', [
-        //           $start->format('m-d'),
-        //           $end->format('m-d'),
-        //       ]);
-        // });
-
-        // $query->where(function ($q) {
-        //     $q->whereNull('pasangan_nia')
-        //       ->orWhereRaw('nia < pasangan_nia');
-        // });
 
         $dataNia = [];
 
@@ -125,8 +110,6 @@ class UltahPernikahanResource extends Resource
     {
         return [
             'index' => Pages\ListUltahPernikahans::route('/'),
-            // 'create' => Pages\CreateUltahPernikahan::route('/create'),
-            // 'edit' => Pages\EditUltahPernikahan::route('/{record}/edit'),
         ];
     }
 
