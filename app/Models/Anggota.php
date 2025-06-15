@@ -8,6 +8,16 @@ class Anggota extends Model
 {
     protected $guarded = [];
 
+    protected $casts = [
+        'tanggal_lahir' => 'date',
+        'tanggal_registrasi' => 'date',
+        // 'minat' => 'array',
+        // 'hobi' => 'array',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+    ];
+    
+
     public function suku() { return $this->belongsTo(Suku::class); }
     public function pendidikan() { return $this->belongsTo(Pendidikan::class); }
     public function hobi() { return $this->belongsTo(Hobi::class); }
@@ -57,22 +67,22 @@ class Anggota extends Model
 
     public function anaks()
     {
-        return $this->hasMany(Anak::class);
+        return $this->hasMany(Anak::class, 'anggota_id');
     }
 
     public function pengalamanGerejawis()
     {
-        return $this->hasMany(PengalamanGerejawi::class);
+        return $this->hasMany(PengalamanGerejawi::class, 'anggota_id');
     }
 
     public function aktivitasSosials()
     {
-        return $this->hasMany(AktivitasSosial::class);
+        return $this->hasMany(AktivitasSosial::class, 'anggota_id');
     }
 
     public function pekerjaans()
     {
-        return $this->hasMany(Pekerjaan::class);
+        return $this->hasMany(Pekerjaan::class, 'anggota_id');
     }
 
     public function organization()

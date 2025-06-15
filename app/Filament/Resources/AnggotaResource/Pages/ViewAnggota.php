@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources\AnggotaResource\Pages;
 
-use App\Filament\Resources\AnggotaResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ViewRecord;
+use App\Filament\Resources\AnggotaResource;
 
 class ViewAnggota extends ViewRecord
 {
@@ -12,10 +12,14 @@ class ViewAnggota extends ViewRecord
 
     protected static string $view = 'filament.resources.anggota-resource.pages.view-anggota';
 
-    // protected function getHeaderActions(): array
-    // {
-    //     return [
-    //         Actions\EditAction::make(),
-    //     ];
-    // }
+    public function getViewData(): array
+    {
+        return [
+            'record' => $this->record,
+            'baptis' => $this->record->baptis,
+            'atestasi' => $this->record->atestasi,
+            'keluarga' => $this->record->keluarga,
+            'aktivitas' => $this->record->aktivitas,
+        ];
+    }
 }

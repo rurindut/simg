@@ -1,40 +1,70 @@
 <x-filament::page>
-    <div class="grid grid-cols-12 gap-4" x-data="{ tab: 'pribadi' }">
-        {{-- Sidebar Kiri --}}
-        <div class="col-span-12 md:col-span-4 bg-white shadow p-4 rounded-xl space-y-3">
-            <div class="text-center font-bold text-lg">
-                {{ $record->nama }}
-            </div>
-            <div class="text-center text-gray-500">
-                {{ $record->status_jemaat }}
-            </div>
+    <div x-data="{ tab: 'pribadi' }" class="space-y-4">
 
-            <hr class="my-4 border-gray-300" />
+        {{-- Tab Header --}}
+        <div class="border-b border-gray-200">
+            <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+                <button
+                    @click="tab = 'pribadi'"
+                    :class="tab === 'pribadi' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                    class="whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium"
+                >
+                    Data Pribadi
+                </button>
 
-            {{-- Ganti key-value dengan HTML manual --}}
-            <div class="space-y-2 text-sm">
-                <div><strong>NIA:</strong> {{ $record->nia }}</div>
-                <div><strong>Email:</strong> {{ $record->email }}</div>
-                <div><strong>No HP:</strong> {{ $record->nomor_hp }}</div>
-                <div><strong>Wilayah:</strong> {{ $record->region?->name ?? 'Menunggu' }}</div>
-                <div><strong>Kelompok:</strong> {{ $record->cluster?->name ?? 'None' }}</div>
-                <div><strong>Alamat:</strong> {{ $record->alamat_ktp }}</div>
-                <div><strong>Suku:</strong> {{ $record->suku?->name ?? 'Kosong' }}</div>
-                <div><strong>Hobi:</strong> {{ $record->hobi?->name ?? 'Kosong' }}</div>
-                <div><strong>Minat:</strong> {{ $record->minat?->name ?? 'Kosong' }}</div>
-            </div>
+                <button
+                    @click="tab = 'baptis'"
+                    :class="tab === 'baptis' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                    class="whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium"
+                >
+                    Data Baptis
+                </button>
+
+                <button
+                    @click="tab = 'atestasi'"
+                    :class="tab === 'atestasi' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                    class="whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium"
+                >
+                    Data Atestasi
+                </button>
+
+                <button
+                    @click="tab = 'keluarga'"
+                    :class="tab === 'keluarga' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                    class="whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium"
+                >
+                    Data Keluarga
+                </button>
+
+                <button
+                    @click="tab = 'aktivitas'"
+                    :class="tab === 'aktivitas' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                    class="whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium"
+                >
+                    Aktivitas
+                </button>
+            </nav>
         </div>
 
-        {{-- Panel Kanan --}}
-        <div class="col-span-12 md:col-span-8 bg-white shadow rounded-xl p-4">
-            {{-- Tab Header --}}
-            <div class="flex space-x-2 border-b border-gray-200 mb-4">
-                <button @click="tab = 'pribadi'" :class="{ 'border-b-2 font-semibold': tab === 'pribadi' }" class="px-4 py-2 hover:text-primary-600">Data Pribadi</button>
-                <button @click="tab = 'baptis'" :class="{ 'border-b-2 font-semibold': tab === 'baptis' }" class="px-4 py-2 hover:text-primary-600">Data Baptis</button>
-                <button @click="tab = 'atestasi'" :class="{ 'border-b-2 font-semibold': tab === 'atestasi' }" class="px-4 py-2 hover:text-primary-600">Data Atestasi</button>
-                <button @click="tab = 'keluarga'" :class="{ 'border-b-2 font-semibold': tab === 'keluarga' }" class="px-4 py-2 hover:text-primary-600">Data Keluarga</button>
-                <button @click="tab = 'aktivitas'" :class="{ 'border-b-2 font-semibold': tab === 'aktivitas' }" class="px-4 py-2 hover:text-primary-600">Aktivitas Sosial</button>
-            </div>
+        {{-- Tab Contents --}}
+        <div x-show="tab === 'pribadi'" class="p-4">
+            @include('filament.resources.anggota-resource.includes.data-pribadi')
+        </div>
+
+        <div x-show="tab === 'baptis'" class="p-4" x-cloak>
+            @include('filament.resources.anggota-resource.includes.data-baptis')
+        </div>
+
+        <div x-show="tab === 'atestasi'" class="p-4" x-cloak>
+            @include('filament.resources.anggota-resource.includes.data-atestasi')
+        </div>
+
+        <div x-show="tab === 'keluarga'" class="p-4" x-cloak>
+            @include('filament.resources.anggota-resource.includes.data-keluarga')
+        </div>
+
+        <div x-show="tab === 'aktivitas'" class="p-4" x-cloak>
+            @include('filament.resources.anggota-resource.includes.data-aktivitas')
         </div>
     </div>
 </x-filament::page>

@@ -84,6 +84,24 @@ class EditAnggotaKeluarga extends Page implements HasForms
     {
         $data = $this->form->getState();
 
+        if (!empty($data['ayah']['nia']) && !Anggota::where('nia', $data['ayah']['nia'])->exists()) {
+            Anggota::create([
+                'nia' => $data['ayah']['nia'],
+                'nama' => $data['ayah']['nama'],
+                'jenis_kelamin' => 'Laki-laki',
+                'organization_id' => $this->record->organization_id,
+            ]);
+        }
+    
+        if (!empty($data['ibu']['nia']) && !Anggota::where('nia', $data['ibu']['nia'])->exists()) {
+            Anggota::create([
+                'nia' => $data['ibu']['nia'],
+                'nama' => $data['ibu']['nama'],
+                'jenis_kelamin' => 'Perempuan',
+                'organization_id' => $this->record->organization_id,
+            ]);
+        }    
+
         // Simpan Ayah
         $this->record->ayah()->updateOrCreate(
             ['hubungan' => 'ayah'],
@@ -107,6 +125,19 @@ class EditAnggotaKeluarga extends Page implements HasForms
                 filled($data['pasangan']['nama']) &&
                 filled($data['pasangan']['no_akta_nikah'])
         ) {
+            if (
+                !empty($data['pasangan']['nia']) &&
+                !Anggota::where('nia', $data['pasangan']['nia'])->exists()
+            ) {
+                $jenisKelaminPasangan = $this->record->jenis_kelamin === 'Laki-laki' ? 'Perempuan' : 'Laki-laki';
+        
+                Anggota::create([
+                    'nia' => $data['pasangan']['nia'],
+                    'nama' => $data['pasangan']['nama'],
+                    'jenis_kelamin' => $jenisKelaminPasangan,
+                    'organization_id' => $this->record->organization_id,
+                ]);
+            }
             $this->record->pasangan()->updateOrCreate(
                 [],
                 [

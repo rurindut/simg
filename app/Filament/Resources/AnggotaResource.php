@@ -27,6 +27,9 @@ use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\Hidden;
+use Filament\Notifications\Notification;
+use Filament\Forms\Set;
+use Filament\Forms\Get;
 
 class AnggotaResource extends Resource
 {
@@ -194,20 +197,43 @@ class AnggotaResource extends Resource
                 ->columnSpanFull()
                 ->default(fn () => auth()->user()?->organization_id)
                 ->visible(fn () => !auth()->user()?->is_super_admin),
-            TextInput::make('nia')->required()->columnSpan(2),
+            TextInput::make('nia')
+                ->label('NIA')
+                ->live(debounce: 500)
+                ->unique(
+                    table: 'anggotas',
+                    column: 'nia',
+                    ignoreRecord: true
+                )
+                ->required()
+                ->validationMessages([
+                    'unique' => 'NIA sudah digunakan.',
+                ])
+                ->columnSpan(2),
             TextInput::make('nik')->columnSpan(2),
             Select::make('sapaan')->options([
                 'bapak' => 'Bapak',
                 'ibu' => 'Ibu',
                 'saudara' => 'Saudara',
                 'saudari' => 'Saudari',
-            ])->columnSpan(1),
+            ])
+            ->required()
+            ->live()
+            ->afterStateUpdated(fn ($state, callable $set) => $set(
+                'jenis_kelamin',
+                in_array($state, ['bapak', 'saudara']) ? 'laki-laki' : 'perempuan'
+            ))
+            ->columnSpan(1),
             TextInput::make('nama')->required()->columnSpan(2),
             TextInput::make('panggilan')->columnSpan(1),
             Select::make('jenis_kelamin')->options([
                 'laki-laki' => 'Laki-laki',
                 'perempuan' => 'Perempuan',
-            ])->columnSpan(1),
+            ])
+            ->required()
+            ->disabled()
+            ->dehydrated()
+            ->columnSpan(1),
             TextInput::make('tempat_lahir')->columnSpan(2),
             DatePicker::make('tanggal_lahir')->columnSpan(1),
             Select::make('status_perkawinan')->options([
@@ -302,8 +328,8 @@ class AnggotaResource extends Resource
         ])->columns(2),
         Section::make()
             ->schema([
-            FileUpload::make('foto_anda')->image()->directory('anggota'),
-            FileUpload::make('foto_keluarga')->image()->directory('anggota-keluarga'),
+            FileUpload::make('foto_anda')->image()->directory('anggota/anggota'),
+            FileUpload::make('foto_keluarga')->image()->directory('anggota/keluarga'),
         ])->columns(2)
         ];
     }
@@ -330,7 +356,7 @@ class AnggotaResource extends Resource
                     TextInput::make('pendeta'),
                     TextInput::make('gereja'),
                     Textarea::make('alamat')->rows(2),
-                    FileUpload::make('lampiran')->image(),
+                    FileUpload::make('lampiran')->image()->directory('anggota/baptis-anak'),
                 ])
                 ->columns(2)
                 ->statePath('baptisAnak'),
@@ -353,7 +379,7 @@ class AnggotaResource extends Resource
                     TextInput::make('pendeta'),
                     TextInput::make('gereja'),
                     Textarea::make('alamat')->rows(2),
-                    FileUpload::make('lampiran')->image(),
+                    FileUpload::make('lampiran')->image()->directory('anggota/baptis-sidi'),
                 ])
                 ->columns(2)
                 ->statePath('baptisSidi'),
@@ -409,25 +435,100 @@ class AnggotaResource extends Resource
                     Hidden::make('ayah.id'),
                     Hidden::make('ayah.hubungan')->default('ayah'),
                     TextInput::make('ayah.nia')
-                        ->label('NIA Ayah'),
+                        ->label('NIA Ayah')
+                        ->reactive()
+                        ->afterStateUpdated(function (?string $state, Set $set, Get $get) {
+                            if (blank($state)) {
+                                $set('ayah.nama', null);
+                                $set('nama.ayah.disabled', false);
+                                return;
+                            }
+
+                            $anggota = Anggota::where('nia', $state)->first();
+
+                            if ($anggota) {
+                                $set('ayah.nama', $anggota->nama);
+                                $set('nama.ayah.disabled', true);
+                            } else {
+                                $set('ayah.nama', null);
+                                $set('nama.ayah.disabled', false);
+                            }
+                        }),
                     TextInput::make('ayah.nama')
-                        ->label('Nama Ayah'),
+                        ->label('Nama Ayah')
+                        ->disabled(fn (Get $get) => $get('nama.ayah.disabled') ?? false)
+                        ->dehydrated()
+                        ->required(fn (Get $get) => !blank($get('ayah.nia'))),
+                    TextInput::make('nama.ayah.disabled')
+                        ->hidden()
+                        ->dehydrated(false),
                 
                     Hidden::make('ibu.id'),
                     Hidden::make('ibu.hubungan')->default('ibu'),
                     TextInput::make('ibu.nia')
-                        ->label('NIA Ibu'),
+                        ->label('NIA Ibu')
+                        ->reactive()
+                        ->afterStateUpdated(function (?string $state, Set $set, Get $get) {
+                            if (blank($state)) {
+                                $set('ibu.nama', null);
+                                $set('nama.ibu.disabled', false);
+                                return;
+                            }
+
+                            $anggota = Anggota::where('nia', $state)->first();
+
+                            if ($anggota) {
+                                $set('ibu.nama', $anggota->nama);
+                                $set('nama.ibu.disabled', true);
+                            } else {
+                                $set('ibu.nama', null);
+                                $set('nama.ibu.disabled', false);
+                            }
+                        }),
+
                     TextInput::make('ibu.nama')
-                        ->label('Nama Ibu'),
+                        ->label('Nama Ibu')
+                        ->disabled(fn (Get $get) => $get('nama.ibu.disabled') ?? false)
+                        ->dehydrated()
+                        ->required(fn (Get $get) => !blank($get('ibu.nia'))),
+
+                    // hidden field to track disable state
+                    TextInput::make('nama.ibu.disabled')
+                        ->hidden()
+                        ->dehydrated(false),
                 ])
                 ->columns(2),
 
             Section::make('Data Pasangan')
                 ->schema([
                     TextInput::make('pasangan.nia')
-                        ->label('NIA Pasangan'),
+                        ->label('NIA Pasangan')
+                        ->reactive()
+                        ->afterStateUpdated(function (?string $state, Set $set, Get $get) {
+                            if (blank($state)) {
+                                $set('pasangan.nama', null);
+                                $set('nama.pasangan.disabled', false);
+                                return;
+                            }
+
+                            $anggota = Anggota::where('nia', $state)->first();
+
+                            if ($anggota) {
+                                $set('pasangan.nama', $anggota->nama);
+                                $set('nama.pasangan.disabled', true);
+                            } else {
+                                $set('pasangan.nama', null);
+                                $set('nama.pasangan.disabled', false);
+                            }
+                        }),
                     TextInput::make('pasangan.nama')
-                        ->label('Nama Pasangan'),
+                        ->label('Nama Pasangan')
+                        ->disabled(fn (Get $get) => $get('nama.pasangan.disabled') ?? false)
+                        ->dehydrated()
+                        ->required(fn (Get $get) => !blank($get('pasangan.nia'))),
+                    TextInput::make('nama.pasangan.disabled')
+                        ->hidden()
+                        ->dehydrated(false),
                     TextInput::make('pasangan.no_akta_nikah')
                         ->label('No. Akta Nikah'),
                     DatePicker::make('pasangan.tanggal_catatan_sipil')
@@ -447,11 +548,11 @@ class AnggotaResource extends Resource
                     FileUpload::make('pasangan.akta_catatan_sipil')
                         ->label('Akta Catatan Sipil')
                         ->image()
-                        ->directory('akta-catatan-sipil'),
+                        ->directory('anggota/catatan-sipil'),
                     FileUpload::make('pasangan.piagam_pemberkatan')
                         ->label('Piagam Pemberkatan')
                         ->image()
-                        ->directory('akta-catatan-sipil'),
+                        ->directory('anggota/piagam-pemberkatan'),
                 ])
                 ->columns(2),
 
