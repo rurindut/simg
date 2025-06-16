@@ -27,11 +27,6 @@ class ClusterResource extends Resource
 
         return $form
             ->schema([
-                Forms\Components\TextInput::make('name')
-                    ->required()
-                    ->maxLength(255),
-
-                // Hanya tampil jika super admin
                 Forms\Components\Select::make('organization_id')
                     ->label('Organisasi')
                     ->relationship('organization', 'name')
@@ -70,7 +65,11 @@ class ClusterResource extends Resource
                                     ->where('organization_id', $organizationId),
                             ];
                         },
-                    ])
+                    ]),
+
+                Forms\Components\TextInput::make('name')
+                    ->required()
+                    ->maxLength(255),
             ]);
     }
 

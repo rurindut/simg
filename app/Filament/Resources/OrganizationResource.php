@@ -137,15 +137,6 @@ class OrganizationResource extends Resource
         return auth()->user()?->hasRole('super_admin') || auth()->user()?->organization_id !== null;
     }
 
-
-    // public static function canCreate(): bool {
-    //     return false;
-    // }
-
-    // public static function canDelete(Model $record): bool {
-    //     return false;
-    // }
-
     public static function getEloquentQuery(): Builder
     {
         $query = parent::getEloquentQuery();

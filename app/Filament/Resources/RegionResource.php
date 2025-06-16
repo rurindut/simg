@@ -23,15 +23,15 @@ class RegionResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('name')
-                    ->required()
-                    ->maxLength(255),
                 Forms\Components\Select::make('organization_id')
                     ->label('Organisasi')
                     ->relationship('organization', 'name')
                     ->searchable()
                     ->visible(fn () => auth()->user()?->is_super_admin ?? false)
                     ->required(fn () => auth()->user()?->is_super_admin ?? false),
+                Forms\Components\TextInput::make('name')
+                    ->required()
+                    ->maxLength(255),
             ]);
     }
 
