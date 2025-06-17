@@ -17,7 +17,7 @@ class MinatResource extends Resource
 {
     protected static ?string $model = Minat::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-magnifying-glass-circle';
 
     public static function form(Form $form): Form
     {

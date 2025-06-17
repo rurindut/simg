@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\AnggotaResource\Pages;
 
 use Filament\Actions;
+use Filament\Actions\Action;
 use Filament\Resources\Pages\ViewRecord;
 use App\Filament\Resources\AnggotaResource;
 
@@ -11,6 +12,18 @@ class ViewAnggota extends ViewRecord
     protected static string $resource = AnggotaResource::class;
 
     protected static string $view = 'filament.resources.anggota-resource.pages.view-anggota';
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            Action::make('edit')
+                ->label('Edit')
+                ->url(fn () => static::getResource()::getUrl('edit', ['record' => $this->record]))
+                ->icon('heroicon-m-pencil-square')
+                ->button()
+                ->color('primary'),
+        ];
+    }
 
     public function getViewData(): array
     {
@@ -21,5 +34,10 @@ class ViewAnggota extends ViewRecord
             'keluarga' => $this->record->keluarga,
             'aktivitas' => $this->record->aktivitas,
         ];
+    }
+
+    public function getTitle(): string
+    {
+        return 'Detail Anggota';
     }
 }
