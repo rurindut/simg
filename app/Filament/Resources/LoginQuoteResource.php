@@ -17,7 +17,7 @@ class LoginQuoteResource extends Resource
 {
     protected static ?string $model = LoginQuote::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-chat-bubble-left-ellipsis';
     protected static ?string $slug = 'login-quotes';
 
     public static function form(Form $form): Form

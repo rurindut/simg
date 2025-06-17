@@ -1,66 +1,102 @@
 <div class="space-y-6">
 
     {{-- ORANG TUA --}}
-    <div>
-        <h3 class="text-lg font-bold text-gray-800">Orang Tua</h3>
+    <x-filament::section>
+        <x-slot name="heading">Orang Tua</x-slot>
+        <x-slot name="description">Data ayah dan ibu dari anggota ini.</x-slot>
 
-        <div class="grid md:grid-cols-2 gap-4 mt-2">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             @if ($record->ayah)
-                <div class="border p-3 rounded-md bg-gray-50">
-                    <div class="font-semibold">Ayah</div>
-                    <div><strong>NIA:</strong> {{ $record->ayah->nia ?? '-' }}</div>
-                    <div><strong>Nama:</strong> {{ $record->ayah->nama ?? '-' }}</div>
+                <div class="filament-card space-y-1">
+                    <div class="font-medium text-gray-900 dark:text-gray-100">Ayah</div>
+                    <div class="text-foreground"><strong>NIA:</strong> {{ $record->ayah->nia ?? '-' }}</div>
+                    <div class="text-foreground"><strong>Nama:</strong> {{ $record->ayah->nama ?? '-' }}</div>
                 </div>
             @endif
 
             @if ($record->ibu)
-                <div class="border p-3 rounded-md bg-gray-50">
-                    <div class="font-semibold">Ibu</div>
-                    <div><strong>NIA:</strong> {{ $record->ibu->nia ?? '-' }}</div>
-                    <div><strong>Nama:</strong> {{ $record->ibu->nama ?? '-' }}</div>
+                <div class="filament-card space-y-1">
+                    <div class="font-medium text-gray-900 dark:text-gray-100">Ibu</div>
+                    <div class="text-foreground"><strong>NIA:</strong> {{ $record->ibu->nia ?? '-' }}</div>
+                    <div class="text-foreground"><strong>Nama:</strong> {{ $record->ibu->nama ?? '-' }}</div>
                 </div>
             @endif
         </div>
-    </div>
+    </x-filament::section>
 
     {{-- PASANGAN --}}
     @if ($record->pasangan)
-        <div>
-            <h3 class="text-lg font-bold text-gray-800">Pasangan</h3>
-            <div class="border p-3 rounded-md bg-gray-50 mt-2">
-                <div><strong>NIA:</strong> {{ $record->pasangan->nia ?? '-' }}</div>
-                <div><strong>Nama:</strong> {{ $record->pasangan->nama ?? '-' }}</div>
-                <div><strong>No. Akta Nikah:</strong> {{ $record->pasangan->no_akta_nikah ?? '-' }}</div>
-                <div><strong>Tanggal Catatan Sipil:</strong>
-                    {{ $record->pasangan->tanggal_catatan_sipil ? \Carbon\Carbon::parse($record->pasangan->tanggal_catatan_sipil)->format('d-m-Y') : '-' }}
-                </div>
-                <div><strong>Tempat Catatan Sipil:</strong> {{ $record->pasangan->tempat_catatan_sipil ?? '-' }}</div>
-                <div><strong>No. Piagam:</strong> {{ $record->pasangan->no_piagam ?? '-' }}</div>
-                <div><strong>Tanggal Pemberkatan:</strong>
-                    {{ $record->pasangan->tanggal_pemberkatan ? \Carbon\Carbon::parse($record->pasangan->tanggal_pemberkatan)->format('d-m-Y') : '-' }}
-                </div>
-                <div><strong>Pendeta:</strong> {{ $record->pasangan->pendeta ?? '-' }}</div>
-                <div><strong>Gereja:</strong> {{ $record->pasangan->gereja ?? '-' }}</div>
-                <div><strong>Alamat Gereja:</strong> {{ $record->pasangan->alamat_gereja ?? '-' }}</div>
+    <x-filament::section>
+        <x-slot name="heading">Pasangan</x-slot>
+        <x-slot name="description">Data pasangan dari anggota ini.</x-slot>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="space-y-2">
+                <p><span class="font-semibold">NIA:</span> <br> {{ $record->pasangan->nia ?? '-' }}</p>
+            </div>
+            <div class="space-y-2">
+                <p><span class="font-semibold">Nama:</span> <br> {{ $record->pasangan->nama ?? '-' }}</p>
+            </div>
+            <div class="space-y-2">
+                <p><span class="font-semibold">No. Akta Nikah:</span> <br> {{ $record->pasangan->no_akta_nikah ?? '-' }}</p>
+            </div>
+            <div class="space-y-2">
+                <p><span class="font-semibold">Tanggal Catatan Sipil:</span> <br> {{ $record->pasangan->tanggal_catatan_sipil ? \Carbon\Carbon::parse($record->pasangan->tanggal_catatan_sipil)->format('d-m-Y') : '-' }}</p>
+            </div>
+            <div class="space-y-2">
+                <p><span class="font-semibold">Tempat Catatan Sipil:</span> <br> {{ $record->pasangan->tempat_catatan_sipil ?? '-' }}</p>
+            </div>
+            <div class="space-y-2">
+                <p><span class="font-semibold">No. Piagam:</span> <br> {{ $record->pasangan->no_piagam ?? '-' }}</p>
+            </div>
+            <div class="space-y-2">
+                <p><span class="font-semibold">Tanggal Pemberkatan:</span> <br> {{ $record->pasangan->tanggal_pemberkatan ? \Carbon\Carbon::parse($record->pasangan->tanggal_pemberkatan)->format('d-m-Y') : '-' }}</p>
+            </div>
+            <div class="space-y-2">
+                <p><span class="font-semibold">Pendeta:</span> <br> {{ $record->pasangan->pendeta ?? '-' }}</p>
+            </div>
+            <div class="space-y-2">
+                <p><span class="font-semibold">Gereja:</span> <br> {{ $record->pasangan->gereja ?? '-' }}</p>
+            </div>
+            <div class="space-y-2">
+                <p><span class="font-semibold">Alamat Gereja:</span> <br> {{ $record->pasangan->alamat_gereja ?? '-' }}</p>
             </div>
         </div>
+    </x-filament::section>
     @endif
 
     {{-- ANAK --}}
-    <div>
-        <h3 class="text-lg font-bold text-gray-800">Anak</h3>
+    <x-filament::section>
+        <x-slot name="heading">Anak</x-slot>
+        <x-slot name="description">Data anak dari anggota ini.</x-slot>
 
         @if ($record->anaks->isNotEmpty())
-            <div class="grid md:grid-cols-2 gap-4 mt-2">
+            <div class="grid grid-cols-1 md:grid-cols-1 gap-4">
                 @foreach ($record->anaks as $anak)
-                    <div class="border p-3 rounded-md bg-gray-50">
-                        <div><strong>NIA:</strong> {{ $anak->nia ?? '-' }}</div>
-                        <div><strong>Nama:</strong> {{ $anak->nama ?? '-' }}</div>
+                <div class="border p-3 rounded-md bg-gray-50 dark:bg-gray-900 dark:border-gray-800 grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
+                    <div class="space-y-2">
+                        <p><span class="font-semibold">NIA:</span> <br> {{ $anak->nia ?? '-' }}</p>
+                    </div>
+                    <div class="space-y-2">
+                        <p><span class="font-semibold">Nama:</span> <br> {{ $anak->nama ?? '-' }}</p>
+                    </div>
+                    <div class="space-y-2">
+                        <p><span class="font-semibold">Tempat, Tgl Lahir:</span> <br> {{ $anak->tempat_lahir ?? '-' }}, {{ \Carbon\Carbon::parse($anak->tanggal_lahir)->translatedFormat('d M Y') }}</p>
+                    </div>
+                    <div class="space-y-2">
+                        <p><span class="font-semibold">Jenis kelamin:</span> <br> {{ $anak->jenis_kelamin ?? '-' }}</p>
+                    </div>
+                    <div class="space-y-2">
+                        <p><span class="font-semibold">Jemaat:</span> <br> {{ $anak->jemaat ?? '-' }}</p>
+                    </div>
+                    <div class="space-y-2">
+                        <p><span class="font-semibold">Alamat:</span> <br> {{ $anak->alamat ?? '-' }}</p>
+                    </div>
                     </div>
                 @endforeach
             </div>
         @else
-            <div class="text-gray-500 italic mt-2">Belum ada data anak.</div>
+            <div class="text-gray-500 dark:text-gray-400 italic">Belum ada data anak.</div>
         @endif
-    </div>
+    </x-filament::section>
 </div>
