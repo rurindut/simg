@@ -8,15 +8,21 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
                     <div class="space-y-2">
-                        <p><span class="font-semibold">Tanggal</span><br>
+                        <p><span class="font-semibold">Tempat Baptis</span><br>
                         
-                            {{ $record->baptisAnak->tanggal?->format('d-m-Y') ?? '-' }}
+                            {{ $record->baptisAnak->tempat ?? '-' }}
                         </p>
                     </div>
                     <div class="space-y-2">
-                        <p><span class="font-semibold">Tempat</span><br>
+                        <p><span class="font-semibold">Nomor Piagam</span><br>
                         
-                            {{ $record->baptisAnak->tempat ?? '-' }}
+                            {{ $record->baptisAnak->no_piagam ?? '-' }}
+                        </p>
+                    </div>
+                    <div class="space-y-2">
+                        <p><span class="font-semibold">Tanggal</span><br>
+                        
+                            {{ $record->baptisAnak->tanggal?->format('d-m-Y') ?? '-' }}
                         </p>
                     </div>
                     <div class="space-y-2">
@@ -38,6 +44,17 @@
                         </p>
                     </div>
                 </div>
+                <div class="mt-6">
+                    <label class="font-bold text-sm text-gray-700 block mb-2">Lampiran:</label>
+                    <div class="flex gap-4">
+                        @if ($record->baptisAnak?->lampiran)
+                            <div class="w-32 h-32 rounded-xl overflow-hidden border shadow">
+                                <img src="{{ Storage::url($record->baptisAnak->lampiran) }}" alt="Lampiran" class="object-cover w-full h-full" />
+                                <p class="text-xs text-center mt-1 text-gray-600">Lampiran</p>
+                            </div>
+                        @endif
+                    </div>
+                </div>
             </x-filament::section>
         @endif
 
@@ -47,17 +64,23 @@
                 <x-slot name="heading">Baptis Sidi</x-slot>
                 <x-slot name="description">Informasi baptisan sidi</x-slot>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
+                    <div class="space-y-2">
+                        <p><span class="font-semibold">Tempat Baptis</span><br>
+                        
+                            {{ $record->baptisSidi->tempat ?? '-' }}
+                        </p>
+                    </div>
+                    <div class="space-y-2">
+                        <p><span class="font-semibold">Nomor Piagam</span><br>
+                        
+                            {{ $record->baptisSidi->no_piagam ?? '-' }}
+                        </p>
+                    </div>
                     <div class="space-y-2">
                         <p><span class="font-semibold">Tanggal</span><br>
                         
                             {{ $record->baptisSidi->tanggal?->format('d-m-Y') ?? '-' }}
-                        </p>
-                    </div>
-                    <div class="space-y-2">
-                        <p><span class="font-semibold">Tempat</span><br>
-                        
-                            {{ $record->baptisSidi->tempat ?? '-' }}
                         </p>
                     </div>
                     <div class="space-y-2">
@@ -77,6 +100,17 @@
                         
                             {{ $record->baptisSidi->alamat_gereja ?? '-' }}
                         </p>
+                    </div>
+                </div>
+                <div class="mt-6">
+                    <label class="font-bold text-sm text-gray-700 block mb-2">Lampiran:</label>
+                    <div class="flex gap-4">
+                        @if ($record->baptisSidi?->lampiran)
+                            <div class="w-32 h-32 rounded-xl overflow-hidden border shadow">
+                                <img src="{{ Storage::url($record->baptisSidi->lampiran) }}" alt="Lampiran" class="object-cover w-full h-full" />
+                                <p class="text-xs text-center mt-1 text-gray-600">Lampiran</p>
+                            </div>
+                        @endif
                     </div>
                 </div>
             </x-filament::section>

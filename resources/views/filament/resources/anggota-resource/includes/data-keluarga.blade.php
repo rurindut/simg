@@ -62,6 +62,30 @@
                 <p><span class="font-semibold">Alamat Gereja:</span> <br> {{ $record->pasangan->alamat_gereja ?? '-' }}</p>
             </div>
         </div>
+        {{-- Lampiran Akta dan Piagam --}}
+        <div class="mt-6">
+            <div class="flex flex-wrap gap-6">
+                @if ($record->pasangan->akta_catatan_sipil)
+                    <div class="w-32">
+                        <label class="font-bold text-sm text-gray-700 block mb-2">Akta Catatan Sipil</label>
+                        <div class="w-32 h-32 rounded-xl overflow-hidden border shadow">
+                            <img src="{{ Storage::url($record->pasangan->akta_catatan_sipil) }}" alt="Akta Catatan Sipil" class="object-cover w-full h-full" />
+                        </div>
+                        <p class="text-xs text-center mt-1 text-gray-600">Akta Catatan Sipil</p>
+                    </div>
+                @endif
+
+                @if ($record->pasangan->piagam_pemberkatan)
+                    <div class="w-32">
+                        <label class="font-bold text-sm text-gray-700 block mb-2">Piagam Pemberkatan</label>
+                        <div class="w-32 h-32 rounded-xl overflow-hidden border shadow">
+                            <img src="{{ Storage::url($record->pasangan->piagam_pemberkatan) }}" alt="Piagam Pemberkatan" class="object-cover w-full h-full" />
+                        </div>
+                        <p class="text-xs text-center mt-1 text-gray-600">Piagam Pemberkatan</p>
+                    </div>
+                @endif
+            </div>
+        </div>
     </x-filament::section>
     @endif
 

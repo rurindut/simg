@@ -10,6 +10,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Tables\Actions\Action as TableAction;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Log;
@@ -108,6 +109,13 @@ class AnggotaResource extends Resource
             ->actions([
                 Tables\Actions\ViewAction::make()->label('Detail'),
                 Tables\Actions\EditAction::make(),
+                TableAction::make('cetak')
+                    ->label('Cetak')
+                    ->icon('heroicon-m-printer')
+                    ->color('grey')
+                    ->url(fn ($record) => route('anggota.cetak', ['record' => $record->getKey()]))
+                    ->openUrlInNewTab()
+                    ->tooltip('Cetak data anggota'),
             ])
             ->bulkActions([
                     Tables\Actions\BulkActionGroup::make([
@@ -429,17 +437,23 @@ class AnggotaResource extends Resource
 
     public static function dataKeluargaForm(): array
     {
+
+        $options = \App\Models\Anggota::get()->pluck('nia', 'nia')->toArray();
+
         return [
             Section::make('Data Orang Tua')
                 ->schema([
                     Hidden::make('ayah.id'),
                     Hidden::make('ayah.hubungan')->default('ayah'),
-                    TextInput::make('ayah.nia')
+                    Select::make('ayah.nia')
                         ->label('NIA Ayah')
+                        ->searchable()
+                        ->options(
+                            $options
+                        )
                         ->reactive()
                         ->afterStateUpdated(function (?string $state, Set $set, Get $get) {
                             if (blank($state)) {
-                                $set('ayah.nama', null);
                                 $set('nama.ayah.disabled', false);
                                 return;
                             }
@@ -465,12 +479,15 @@ class AnggotaResource extends Resource
                 
                     Hidden::make('ibu.id'),
                     Hidden::make('ibu.hubungan')->default('ibu'),
-                    TextInput::make('ibu.nia')
+                    Select::make('ibu.nia')
                         ->label('NIA Ibu')
+                        ->searchable()
+                        ->options(
+                            $options
+                        )
                         ->reactive()
                         ->afterStateUpdated(function (?string $state, Set $set, Get $get) {
                             if (blank($state)) {
-                                $set('ibu.nama', null);
                                 $set('nama.ibu.disabled', false);
                                 return;
                             }
@@ -485,7 +502,6 @@ class AnggotaResource extends Resource
                                 $set('nama.ibu.disabled', false);
                             }
                         }),
-
                     TextInput::make('ibu.nama')
                         ->label('Nama Ibu')
                         ->disabled(fn (Get $get) => $get('nama.ibu.disabled') ?? false)
@@ -501,12 +517,15 @@ class AnggotaResource extends Resource
 
             Section::make('Data Pasangan')
                 ->schema([
-                    TextInput::make('pasangan.nia')
+                    Select::make('pasangan.nia')
                         ->label('NIA Pasangan')
+                        ->searchable()
+                        ->options(
+                            $options
+                        )
                         ->reactive()
                         ->afterStateUpdated(function (?string $state, Set $set, Get $get) {
                             if (blank($state)) {
-                                $set('pasangan.nama', null);
                                 $set('nama.pasangan.disabled', false);
                                 return;
                             }
@@ -563,12 +582,38 @@ class AnggotaResource extends Resource
                         ->label('Anak')
                         ->relationship('anaks')
                         ->schema([
-                            TextInput::make('nia')
+                            Select::make('nia')
                                 ->label('NIA')
+                                ->searchable()
+                                ->options(
+                                    $options
+                                )
+                                ->reactive()
+                                ->afterStateUpdated(function (Set $set, Get $get, ?string $state) {
+                                    if (blank($state)) {
+                                        $set('nama_disabled', false);
+                                        return;
+                                    }
+
+                                    $anggota = Anggota::where('nia', $state)->first();
+
+                                    if ($anggota) {
+                                        $set('nama', $anggota->nama);
+                                        $set('nama_disabled', true);
+                                    } else {
+                                        $set('nama', null);
+                                        $set('nama_disabled', false);
+                                    }
+                                })
                                 ->columnSpan(1),
                             TextInput::make('nama')
-                                ->label('Nama')->required()
-                                ->columnSpan(1),
+                                ->label('Nama')
+                                ->disabled(fn (Get $get) => $get('nama_disabled') ?? false)
+                                ->required(fn (Get $get) => !blank($get('nia')))
+                                ->dehydrated(),
+                            TextInput::make('nama_disabled')
+                                ->hidden()
+                                ->dehydrated(false),
                             TextInput::make('tempat_lahir')
                                 ->label('Tempat Lahir')
                                 ->columnSpan(1),
@@ -596,7 +641,7 @@ class AnggotaResource extends Resource
                         ->addActionLabel('Tambah Anak')
                         ->columns(4),
                 ])
-                ->collapsible(),            
+                ->collapsible(),
         ];
     }
 
