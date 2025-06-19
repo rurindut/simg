@@ -33,9 +33,9 @@
         <p><span class="font-semibold">Disiplin Ilmu</span><br>{{ $record->disiplin_ilmu ?? '-' }}</p>
         <p><span class="font-semibold">Jurusan</span><br>{{ $record->jurusan ?? '-' }}</p>
         <p><span class="font-semibold">Gelar</span><br>{{ $record->gelar ?? '-' }}</p>
-        <p><span class="font-semibold">Hobi</span><br>{{ $record->hobi?->name ?? '-' }}</p>
-        <p><span class="font-semibold">Minat</span><br>{{ $record->minat?->name ?? '-' }}</p>
-        <p><span class="font-semibold">Lokasi</span><br>{{ $record->lokasi ?? 'Data peta tidak valid!' }}</p>
+        <p><span class="font-semibold">Hobi</span><br>{{ $record->hobis->pluck('name')->implode(', ') ?: '-' }}</p>
+        <p><span class="font-semibold">Minat</span><br>{{ $record->minats->pluck('name')->implode(', ') ?: '-' }}</p>
+        <!-- <p><span class="font-semibold">Lokasi</span><br>{{ $record->lokasi ?? 'Data peta tidak valid!' }}</p> -->
     </div>
 </div>
 

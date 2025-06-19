@@ -35,9 +35,22 @@ class UltahPernikahanPage extends Page implements HasTable
         return $table
             ->query($this->getQuery())
             ->columns([
-                TextColumn::make('nama')->label('Nama Anggota'),
-                TextColumn::make('pasangan.nama')->label('Nama Pasangan'),
-                TextColumn::make('pasangan.tanggal_pemberkatan')->label('Tanggal Pemberkatan')->date('d M Y'),
+                TextColumn::make('nama')->label('Nama'),
+                TextColumn::make('pasangan.nama')->label('Pasangan'),
+                TextColumn::make('pasangan.tanggal_catatan_sipil')->label('Tanggal Catatan Sipil')->date('d M Y'),
+                TextColumn::make('ultah_ke')
+                ->label('Ultah Ke')
+                ->getStateUsing(function ($record) {
+                    $tanggal = $record->pasangan?->tanggal_catatan_sipil;
+
+                    if (! $tanggal) {
+                        return '-';
+                    }
+
+                    $tahun = \Carbon\Carbon::parse($tanggal)->diffInYears(now());
+
+                    return $tahun > 0 ? round($tahun) . ' Tahun' : '-';
+                }),
             ]);
     }
 
@@ -47,8 +60,8 @@ class UltahPernikahanPage extends Page implements HasTable
         $end = Carbon::now()->endOfWeek(Carbon::SUNDAY)->format('m-d');
 
         $pasangans = Pasangan::query()
-            ->whereNotNull('tanggal_pemberkatan')
-            ->whereRaw('DATE_FORMAT(tanggal_pemberkatan, "%m-%d") BETWEEN ? AND ?', [$start, $end])
+            ->whereNotNull('tanggal_catatan_sipil')
+            ->whereRaw('DATE_FORMAT(tanggal_catatan_sipil, "%m-%d") BETWEEN ? AND ?', [$start, $end])
             ->get();
 
         $niaUtama = [];

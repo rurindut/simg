@@ -31,6 +31,7 @@ use Filament\Forms\Components\Hidden;
 use Filament\Notifications\Notification;
 use Filament\Forms\Set;
 use Filament\Forms\Get;
+use App\Models\Kota;
 
 class AnggotaResource extends Resource
 {
@@ -242,15 +243,38 @@ class AnggotaResource extends Resource
             ->disabled()
             ->dehydrated()
             ->columnSpan(1),
-            TextInput::make('tempat_lahir')->columnSpan(2),
-            DatePicker::make('tanggal_lahir')->columnSpan(1),
+            Select::make('tempat_lahir')
+                ->label('Tempat Lahir')
+                ->searchable()
+                ->preload(false)
+                ->getSearchResultsUsing(function (string $search): array {
+                    return Kota::query()
+                        ->where('kota', 'like', "%{$search}%")
+                        ->orderBy('kota')
+                        ->limit(20)
+                        ->pluck('kota', 'kota')
+                        ->toArray();
+                })
+                ->required()
+                ->columnSpan(2),
+            DatePicker::make('tanggal_lahir')->required()->columnSpan(1),
             Select::make('status_perkawinan')->options([
                 'kawin' => 'Kawin',
                 'belum_kawin' => 'Belum Kawin',
                 'cerai_hidup' => 'Cerai Hidup',
                 'cerai_mati' => 'Cerai Mati',
             ])->columnSpan(1),
-            Select::make('suku_id')->searchable()->relationship('suku', 'name')->preload()->columnSpan(1),
+            Select::make('suku_id')
+            ->label('Suku')
+            ->relationship('suku', 'name')
+            ->searchable()
+            ->preload(false)
+            ->createOptionForm([
+                TextInput::make('name')
+                    ->label('Nama Suku')
+                    ->required(),
+            ])
+            ->columnSpan(1),
             Select::make('golongan_darah')->options([
                 '-' => '-',
                 'A' => 'A',
@@ -274,11 +298,43 @@ class AnggotaResource extends Resource
             TextInput::make('nomor_hp')->columnSpan(1),
             TextInput::make('telepon')->columnSpan(1),
             DatePicker::make('tanggal_registrasi')->columnSpan(2),
-            TextInput::make('maps')->columnSpan(2),
+            // TextInput::make('maps')->columnSpan(2),
             Textarea::make('alamat_ktp')->columnSpan(2),
-            TextInput::make('kecamatan_ktp')->columnSpan(2),
+            Select::make('kecamatan_ktp')
+                ->label('Kecamatan KTP')
+                ->searchable()
+                ->preload(false)
+                ->getSearchResultsUsing(function (string $search): array {
+                    return Kota::query()
+                    ->where(function ($query) use ($search) {
+                        $query->where('kota', 'like', "%{$search}%")
+                        ->orWhere('kecamatan', 'like', "%{$search}%");
+                    })
+                    ->get()
+                    ->mapWithKeys(fn ($item) => [
+                        "{$item->kota}, {$item->kecamatan}" => "{$item->kota}, {$item->kecamatan}"
+                    ])
+                    ->toArray();
+                })
+                ->columnSpan(2),
             Textarea::make('alamat_domisili')->columnSpan(2),
-            TextInput::make('kecamatan_domisili')->columnSpan(2),
+            Select::make('kecamatan_domisili')
+                ->label('Kecamatan Domisili')
+                ->searchable()
+                ->preload(false)
+                ->getSearchResultsUsing(function (string $search): array {
+                    return Kota::query()
+                    ->where(function ($query) use ($search) {
+                        $query->where('kota', 'like', "%{$search}%")
+                        ->orWhere('kecamatan', 'like', "%{$search}%");
+                    })
+                    ->get()
+                    ->mapWithKeys(fn ($item) => [
+                        "{$item->kota}, {$item->kecamatan}" => "{$item->kota}, {$item->kecamatan}"
+                    ])
+                    ->toArray();
+                })
+                ->columnSpan(2),
             Select::make('status_tinggal')->options([
                 'tinggal' => 'Tinggal',
                 'luar_kota' => 'Luar Kota',
@@ -290,12 +346,45 @@ class AnggotaResource extends Resource
         ])->columns(4),
         Section::make()
             ->schema([
-            Select::make('pendidikan_id')->relationship('pendidikan', 'name')->searchable()->columnSpan(1),
+            Select::make('pendidikan_id')
+            ->label('Pendidikan')
+            ->relationship('pendidikan', 'name')
+            ->searchable()
+            ->preload(true)
+            ->createOptionForm([
+                TextInput::make('initial')
+                    ->label('Kode Singkat (Initial)')
+                    ->required(),
+                TextInput::make('name')
+                    ->label('Nama Pendidikan')
+                    ->required(),
+            ])
+            ->columnSpan(1),
             TextInput::make('disiplin_ilmu')->columnSpan(1),
             TextInput::make('jurusan')->columnSpan(1),
             TextInput::make('gelar')->columnSpan(1),
-            Select::make('hobi_id')->relationship('hobi', 'name')->searchable()->columnSpan(1),
-            Select::make('minat_id')->relationship('minat', 'name')->searchable()->columnSpan(1),
+            Select::make('hobis')
+            ->label('Hobi')
+            ->relationship('hobis', 'name')
+            ->multiple()
+            ->searchable()
+            ->preload()
+            ->createOptionForm([
+                TextInput::make('name')->label('Nama Hobi')->required(),
+            ])
+            ->getOptionLabelFromRecordUsing(fn ($record) => $record->name)
+            ->columnSpan(1),
+            Select::make('minats')
+            ->label('Minat')
+            ->relationship('minats', 'name')
+            ->multiple()
+            ->searchable()
+            ->preload()
+            ->createOptionForm([
+                TextInput::make('name')->label('Nama Minat')->required(),
+            ])
+            ->getOptionLabelFromRecordUsing(fn ($record) => $record->name)
+            ->columnSpan(1),
             Select::make('status_jemaat')->options([
                 'anggota' => 'Anggota',
                 'simpatisan' => 'Simpatisan',
@@ -614,9 +703,19 @@ class AnggotaResource extends Resource
                             TextInput::make('nama_disabled')
                                 ->hidden()
                                 ->dehydrated(false),
-                            TextInput::make('tempat_lahir')
-                                ->label('Tempat Lahir')
-                                ->columnSpan(1),
+                            Select::make('tempat_lahir')
+                            ->label('Tempat Lahir')
+                            ->searchable()
+                            ->preload(false)
+                            ->getSearchResultsUsing(function (string $search): array {
+                                return Kota::query()
+                                ->where('kota', 'like', "%{$search}%")
+                                ->orderBy('kota')
+                                ->limit(20)
+                                ->pluck('kota', 'kota')
+                                ->toArray();
+                            })
+                            ->columnSpan(1),
                             DatePicker::make('tanggal_lahir')
                                 ->label('Tanggal Lahir')
                                 ->columnSpan(1),

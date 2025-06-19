@@ -25,6 +25,16 @@ class Anggota extends Model
     public function region() { return $this->belongsTo(Region::class); }
     public function cluster() { return $this->belongsTo(Cluster::class); }
 
+    public function hobis()
+    {
+        return $this->belongsToMany(Hobi::class);
+    }
+
+    public function minats()
+    {
+        return $this->belongsToMany(Minat::class);
+    }
+
     public function baptis()
     {
         return $this->hasMany(\App\Models\Baptis::class);
