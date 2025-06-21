@@ -4,42 +4,11 @@
         <div class="w-72 p-4 rounded-xl shadow border filament-border divide-y">
             <div class="text-center pb-4">
                 <h2 class="text-base font-medium text-foreground">{{ $record->nama }}</h2>
-                <div class="text-sm text-muted">{{ $record->status ?? '-' }}</div>
+                <div class="text-sm text-muted">{{ $record->status_jemaat ?? '-' }}</div>
             </div>
 
             <div class="pt-2 text-sm space-y-3">
-                <div class="pt-2">
-                    <div class="font-medium text-muted">NIA</div>
-                    <div class="text-foreground">{{ $record->nia ?? '-' }}</div>
-                </div>
-                <div class="pt-2">
-                    <div class="font-medium text-muted">Email</div>
-                    <div class="text-foreground">{{ $record->email ?? '-' }}</div>
-                </div>
-                <div class="pt-2">
-                    <div class="font-medium text-muted">No Hp</div>
-                    <div class="text-foreground">{{ $record->nomor_hp ?? '-' }}</div>
-                </div>
-                <div class="pt-2">
-                    <div class="font-medium text-muted">Wilayah</div>
-                    <div class="text-foreground">{{ $record->wilayah?->nama ?? '-' }}</div>
-                </div>
-                <div class="pt-2">
-                    <div class="font-medium text-muted">Kelompok</div>
-                    <div class="text-foreground">{{ $record->kelompok?->nama ?? '-' }}</div>
-                </div>
-                <div class="pt-2">
-                    <div class="font-medium text-muted">Alamat</div>
-                    <div class="text-foreground">{{ $record->alamat ?? '-' }}</div>
-                </div>
-                <div class="pt-2">
-                    <div class="font-medium text-muted">Suku</div>
-                    <div class="text-foreground">{{ $record->suku?->nama ?? '-' }}</div>
-                </div>
-                <div class="pt-2">
-                    <div class="font-medium text-muted">Hobi</div>
-                    <div class="text-foreground">{{ $record->hobi?->nama ?? '-' }}</div>
-                </div>
+                @include('filament.resources.anggota-resource.includes.sidepanel-anggota')
             </div>
         </div>
 

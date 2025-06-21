@@ -34,8 +34,34 @@ class UltahKelahiranPage extends Page implements HasTable
         return $table
             ->query($this->getQuery())
             ->columns([
-                TextColumn::make('nama')->label('Nama'),
+                TextColumn::make('nia')->label('NIA'),
+                TextColumn::make('nama')->label('Nama Lengkap')->sortable(),
                 TextColumn::make('tanggal_lahir')->label('Tanggal Lahir')->date('d M Y'),
+                TextColumn::make('panggilan')->label('Panggilan'),
+                TextColumn::make('nomor_hp')->label('No. HP')->sortable(),
+                TextColumn::make('keluarga')
+                    ->label('Keluarga')
+                    ->getStateUsing(function ($record) {
+                        $pasangan = optional($record->pasangan)?->nama;
+                        $jumlahAnak = $record->anaks()->count();
+                        return ($pasangan ? 1 : 0) + $jumlahAnak;
+                    }),
+                TextColumn::make('status_jemaat')
+                    ->label('Status')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'anggota' => 'success',
+                        'simpatisan' => 'warning',
+                        default => 'gray',
+                    })
+                    ->sortable(),
+                TextColumn::make('usia')
+                    ->label('Usia')
+                    ->getStateUsing(function ($record) {
+                        return $record->tanggal_lahir
+                            ? \Carbon\Carbon::parse($record->tanggal_lahir)->age . ' tahun'
+                            : '-';
+                    }),
             ]);
     }
 

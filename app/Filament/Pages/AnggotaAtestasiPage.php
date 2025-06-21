@@ -11,6 +11,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Illuminate\Database\Eloquent\Builder;
+use App\Filament\Resources\AnggotaResource;
 
 class AnggotaAtestasiPage extends Page implements HasTable
 {
@@ -32,11 +33,46 @@ class AnggotaAtestasiPage extends Page implements HasTable
         return $table
             ->query($this->getQuery())
             ->columns([
-                TextColumn::make('anggota.nama')->label('Nama Anggota')->sortable(),
-                TextColumn::make('tipe')->label('Tipe')->sortable(),
-                TextColumn::make('tanggal')->label('Tanggal')->date()->sortable(),
-                TextColumn::make('asal_gereja')->label('Asal'),
-                TextColumn::make('tujuan_gereja')->label('Tujuan'),
+                TextColumn::make('anggota.nia')->label('NIA'),
+                TextColumn::make('anggota.nama')->label('Nama Lengkap')->sortable(),
+                TextColumn::make('anggota.nomor_hp')->label('No. HP')->sortable(),
+                TextColumn::make('anggota.region.name')
+                    ->label('Wilayah')
+                    ->searchable(),
+                TextColumn::make('anggota.cluster.name')
+                    ->label('Kelompok')
+                    ->searchable(),
+                TextColumn::make('keluarga')
+                    ->label('Keluarga')
+                    ->getStateUsing(function ($record) {
+                        $anggota = $record->anggota;
+                        if (! $anggota) return '-';
+                        $pasangan = optional($anggota->pasangan)?->nama;
+                        $jumlahAnak = $anggota->anaks()->count();
+                        return ($pasangan ? 1 : 0) + $jumlahAnak;
+                    }),
+                TextColumn::make('anggota.status_jemaat')
+                    ->label('Status')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'anggota' => 'success',
+                        'simpatisan' => 'warning',
+                        default => 'gray',
+                    })
+                    ->sortable(),
+                TextColumn::make('anggota.usia')
+                    ->label('Usia')
+                    ->getStateUsing(function ($record) {
+                        $anggota = $record->anggota;
+                        return $anggota->tanggal_lahir
+                            ? \Carbon\Carbon::parse($anggota->tanggal_lahir)->age . ' tahun'
+                            : '-';
+                    }),
+            ])
+            ->actions([
+                Tables\Actions\EditAction::make()
+                    ->url(fn ($record) => AnggotaResource::getUrl('edit', ['record' => $record->anggota_id]))
+                    ->icon('heroicon-m-pencil'),
             ]);
     }
 

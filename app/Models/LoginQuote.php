@@ -7,4 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 class LoginQuote extends Model
 {
     protected $guarded = [];
+    protected $table = 'login_quotes';
+    public $timestamps = false;
 }

@@ -6,6 +6,7 @@ use Filament\Actions;
 use Filament\Actions\Action;
 use Filament\Resources\Pages\ViewRecord;
 use App\Filament\Resources\AnggotaResource;
+use Illuminate\View\View;
 
 class ViewAnggota extends ViewRecord
 {
@@ -22,6 +23,12 @@ class ViewAnggota extends ViewRecord
                 ->icon('heroicon-m-pencil-square')
                 ->button()
                 ->color('primary'),
+            Action::make('print')
+                ->label('Cetak')
+                ->icon('heroicon-m-printer')
+                ->url(fn () => route('anggota.cetak', ['record' => $this->record]))
+                ->openUrlInNewTab()
+                ->color('gray'),
         ];
     }
 

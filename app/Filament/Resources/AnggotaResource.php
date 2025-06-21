@@ -10,6 +10,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Tables\Actions\Action as TableAction;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Log;
@@ -30,6 +31,7 @@ use Filament\Forms\Components\Hidden;
 use Filament\Notifications\Notification;
 use Filament\Forms\Set;
 use Filament\Forms\Get;
+use App\Models\Kota;
 
 class AnggotaResource extends Resource
 {
@@ -108,6 +110,13 @@ class AnggotaResource extends Resource
             ->actions([
                 Tables\Actions\ViewAction::make()->label('Detail'),
                 Tables\Actions\EditAction::make(),
+                TableAction::make('cetak')
+                    ->label('Cetak')
+                    ->icon('heroicon-m-printer')
+                    ->color('grey')
+                    ->url(fn ($record) => route('anggota.cetak', ['record' => $record->getKey()]))
+                    ->openUrlInNewTab()
+                    ->tooltip('Cetak data anggota'),
             ])
             ->bulkActions([
                     Tables\Actions\BulkActionGroup::make([
@@ -234,15 +243,38 @@ class AnggotaResource extends Resource
             ->disabled()
             ->dehydrated()
             ->columnSpan(1),
-            TextInput::make('tempat_lahir')->columnSpan(2),
-            DatePicker::make('tanggal_lahir')->columnSpan(1),
+            Select::make('tempat_lahir')
+                ->label('Tempat Lahir')
+                ->searchable()
+                ->preload(false)
+                ->getSearchResultsUsing(function (string $search): array {
+                    return Kota::query()
+                        ->where('kota', 'like', "%{$search}%")
+                        ->orderBy('kota')
+                        ->limit(20)
+                        ->pluck('kota', 'kota')
+                        ->toArray();
+                })
+                ->required()
+                ->columnSpan(2),
+            DatePicker::make('tanggal_lahir')->required()->columnSpan(1),
             Select::make('status_perkawinan')->options([
                 'kawin' => 'Kawin',
                 'belum_kawin' => 'Belum Kawin',
                 'cerai_hidup' => 'Cerai Hidup',
                 'cerai_mati' => 'Cerai Mati',
             ])->columnSpan(1),
-            Select::make('suku_id')->searchable()->relationship('suku', 'name')->preload()->columnSpan(1),
+            Select::make('suku_id')
+            ->label('Suku')
+            ->relationship('suku', 'name')
+            ->searchable()
+            ->preload(false)
+            ->createOptionForm([
+                TextInput::make('name')
+                    ->label('Nama Suku')
+                    ->required(),
+            ])
+            ->columnSpan(1),
             Select::make('golongan_darah')->options([
                 '-' => '-',
                 'A' => 'A',
@@ -266,11 +298,43 @@ class AnggotaResource extends Resource
             TextInput::make('nomor_hp')->columnSpan(1),
             TextInput::make('telepon')->columnSpan(1),
             DatePicker::make('tanggal_registrasi')->columnSpan(2),
-            TextInput::make('maps')->columnSpan(2),
+            // TextInput::make('maps')->columnSpan(2),
             Textarea::make('alamat_ktp')->columnSpan(2),
-            TextInput::make('kecamatan_ktp')->columnSpan(2),
+            Select::make('kecamatan_ktp')
+                ->label('Kecamatan KTP')
+                ->searchable()
+                ->preload(false)
+                ->getSearchResultsUsing(function (string $search): array {
+                    return Kota::query()
+                    ->where(function ($query) use ($search) {
+                        $query->where('kota', 'like', "%{$search}%")
+                        ->orWhere('kecamatan', 'like', "%{$search}%");
+                    })
+                    ->get()
+                    ->mapWithKeys(fn ($item) => [
+                        "{$item->kota}, {$item->kecamatan}" => "{$item->kota}, {$item->kecamatan}"
+                    ])
+                    ->toArray();
+                })
+                ->columnSpan(2),
             Textarea::make('alamat_domisili')->columnSpan(2),
-            TextInput::make('kecamatan_domisili')->columnSpan(2),
+            Select::make('kecamatan_domisili')
+                ->label('Kecamatan Domisili')
+                ->searchable()
+                ->preload(false)
+                ->getSearchResultsUsing(function (string $search): array {
+                    return Kota::query()
+                    ->where(function ($query) use ($search) {
+                        $query->where('kota', 'like', "%{$search}%")
+                        ->orWhere('kecamatan', 'like', "%{$search}%");
+                    })
+                    ->get()
+                    ->mapWithKeys(fn ($item) => [
+                        "{$item->kota}, {$item->kecamatan}" => "{$item->kota}, {$item->kecamatan}"
+                    ])
+                    ->toArray();
+                })
+                ->columnSpan(2),
             Select::make('status_tinggal')->options([
                 'tinggal' => 'Tinggal',
                 'luar_kota' => 'Luar Kota',
@@ -282,12 +346,45 @@ class AnggotaResource extends Resource
         ])->columns(4),
         Section::make()
             ->schema([
-            Select::make('pendidikan_id')->relationship('pendidikan', 'name')->searchable()->columnSpan(1),
+            Select::make('pendidikan_id')
+            ->label('Pendidikan')
+            ->relationship('pendidikan', 'name')
+            ->searchable()
+            ->preload(true)
+            ->createOptionForm([
+                TextInput::make('initial')
+                    ->label('Kode Singkat (Initial)')
+                    ->required(),
+                TextInput::make('name')
+                    ->label('Nama Pendidikan')
+                    ->required(),
+            ])
+            ->columnSpan(1),
             TextInput::make('disiplin_ilmu')->columnSpan(1),
             TextInput::make('jurusan')->columnSpan(1),
             TextInput::make('gelar')->columnSpan(1),
-            Select::make('hobi_id')->relationship('hobi', 'name')->searchable()->columnSpan(1),
-            Select::make('minat_id')->relationship('minat', 'name')->searchable()->columnSpan(1),
+            Select::make('hobis')
+            ->label('Hobi')
+            ->relationship('hobis', 'name')
+            ->multiple()
+            ->searchable()
+            ->preload()
+            ->createOptionForm([
+                TextInput::make('name')->label('Nama Hobi')->required(),
+            ])
+            ->getOptionLabelFromRecordUsing(fn ($record) => $record->name)
+            ->columnSpan(1),
+            Select::make('minats')
+            ->label('Minat')
+            ->relationship('minats', 'name')
+            ->multiple()
+            ->searchable()
+            ->preload()
+            ->createOptionForm([
+                TextInput::make('name')->label('Nama Minat')->required(),
+            ])
+            ->getOptionLabelFromRecordUsing(fn ($record) => $record->name)
+            ->columnSpan(1),
             Select::make('status_jemaat')->options([
                 'anggota' => 'Anggota',
                 'simpatisan' => 'Simpatisan',
@@ -429,17 +526,23 @@ class AnggotaResource extends Resource
 
     public static function dataKeluargaForm(): array
     {
+
+        $options = \App\Models\Anggota::get()->pluck('nia', 'nia')->toArray();
+
         return [
             Section::make('Data Orang Tua')
                 ->schema([
                     Hidden::make('ayah.id'),
                     Hidden::make('ayah.hubungan')->default('ayah'),
-                    TextInput::make('ayah.nia')
+                    Select::make('ayah.nia')
                         ->label('NIA Ayah')
+                        ->searchable()
+                        ->options(
+                            $options
+                        )
                         ->reactive()
                         ->afterStateUpdated(function (?string $state, Set $set, Get $get) {
                             if (blank($state)) {
-                                $set('ayah.nama', null);
                                 $set('nama.ayah.disabled', false);
                                 return;
                             }
@@ -465,12 +568,15 @@ class AnggotaResource extends Resource
                 
                     Hidden::make('ibu.id'),
                     Hidden::make('ibu.hubungan')->default('ibu'),
-                    TextInput::make('ibu.nia')
+                    Select::make('ibu.nia')
                         ->label('NIA Ibu')
+                        ->searchable()
+                        ->options(
+                            $options
+                        )
                         ->reactive()
                         ->afterStateUpdated(function (?string $state, Set $set, Get $get) {
                             if (blank($state)) {
-                                $set('ibu.nama', null);
                                 $set('nama.ibu.disabled', false);
                                 return;
                             }
@@ -485,7 +591,6 @@ class AnggotaResource extends Resource
                                 $set('nama.ibu.disabled', false);
                             }
                         }),
-
                     TextInput::make('ibu.nama')
                         ->label('Nama Ibu')
                         ->disabled(fn (Get $get) => $get('nama.ibu.disabled') ?? false)
@@ -501,12 +606,15 @@ class AnggotaResource extends Resource
 
             Section::make('Data Pasangan')
                 ->schema([
-                    TextInput::make('pasangan.nia')
+                    Select::make('pasangan.nia')
                         ->label('NIA Pasangan')
+                        ->searchable()
+                        ->options(
+                            $options
+                        )
                         ->reactive()
                         ->afterStateUpdated(function (?string $state, Set $set, Get $get) {
                             if (blank($state)) {
-                                $set('pasangan.nama', null);
                                 $set('nama.pasangan.disabled', false);
                                 return;
                             }
@@ -563,15 +671,51 @@ class AnggotaResource extends Resource
                         ->label('Anak')
                         ->relationship('anaks')
                         ->schema([
-                            TextInput::make('nia')
+                            Select::make('nia')
                                 ->label('NIA')
+                                ->searchable()
+                                ->options(
+                                    $options
+                                )
+                                ->reactive()
+                                ->afterStateUpdated(function (Set $set, Get $get, ?string $state) {
+                                    if (blank($state)) {
+                                        $set('nama_disabled', false);
+                                        return;
+                                    }
+
+                                    $anggota = Anggota::where('nia', $state)->first();
+
+                                    if ($anggota) {
+                                        $set('nama', $anggota->nama);
+                                        $set('nama_disabled', true);
+                                    } else {
+                                        $set('nama', null);
+                                        $set('nama_disabled', false);
+                                    }
+                                })
                                 ->columnSpan(1),
                             TextInput::make('nama')
-                                ->label('Nama')->required()
-                                ->columnSpan(1),
-                            TextInput::make('tempat_lahir')
-                                ->label('Tempat Lahir')
-                                ->columnSpan(1),
+                                ->label('Nama')
+                                ->disabled(fn (Get $get) => $get('nama_disabled') ?? false)
+                                ->required(fn (Get $get) => !blank($get('nia')))
+                                ->dehydrated(),
+                            TextInput::make('nama_disabled')
+                                ->hidden()
+                                ->dehydrated(false),
+                            Select::make('tempat_lahir')
+                            ->label('Tempat Lahir')
+                            ->searchable()
+                            ->preload(false)
+                            ->getSearchResultsUsing(function (string $search): array {
+                                return Kota::query()
+                                ->where('kota', 'like', "%{$search}%")
+                                ->orderBy('kota')
+                                ->limit(20)
+                                ->pluck('kota', 'kota')
+                                ->toArray();
+                            })
+                            ->columnSpan(1),
                             DatePicker::make('tanggal_lahir')
                                 ->label('Tanggal Lahir')
                                 ->columnSpan(1),
@@ -596,7 +740,7 @@ class AnggotaResource extends Resource
                         ->addActionLabel('Tambah Anak')
                         ->columns(4),
                 ])
-                ->collapsible(),            
+                ->collapsible(),
         ];
     }
 
