@@ -35,7 +35,7 @@
                 <p><span class="font-semibold">NIA:</span> <br> {{ $record->pasangan->nia ?? '-' }}</p>
             </div>
             <div class="space-y-2">
-                <p><span class="font-semibold">Nama:</span> <br> {{ $record->pasangan->nama ?? '-' }}</p>
+                <p><span class="font-semibold">Nama Pasangan:</span> <br> {{ $record->pasangan->nama ?? '-' }}</p>
             </div>
             <div class="space-y-2">
                 <p><span class="font-semibold">No. Akta Nikah:</span> <br> {{ $record->pasangan->no_akta_nikah ?? '-' }}</p>
@@ -105,7 +105,7 @@
                         <p><span class="font-semibold">Nama:</span> <br> {{ $anak->nama ?? '-' }}</p>
                     </div>
                     <div class="space-y-2">
-                        <p><span class="font-semibold">Tempat, Tgl Lahir:</span> <br> {{ $anak->tempat_lahir ?? '-' }}, {{ \Carbon\Carbon::parse($anak->tanggal_lahir)->translatedFormat('d M Y') }}</p>
+                        <p><span class="font-semibold">Tempat, Tgl Lahir:</span> <br> {{ $anak->tempat_lahir ?? '-' }}, {{ $anak->tanggal_lahir ? \Carbon\Carbon::parse($anak->tanggal_lahir)->translatedFormat('d M Y') : '' }}</p>
                     </div>
                     <div class="space-y-2">
                         <p><span class="font-semibold">Jenis kelamin:</span> <br> {{ $anak->jenis_kelamin ?? '-' }}</p>

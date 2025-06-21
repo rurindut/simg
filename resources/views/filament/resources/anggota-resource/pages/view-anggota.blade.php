@@ -4,7 +4,7 @@
         <div class="w-72 p-4 rounded-xl shadow border filament-border divide-y">
             <div class="text-center pb-4">
                 <h2 class="text-base font-medium text-foreground">{{ $record->nama }}</h2>
-                <div class="text-sm text-muted">{{ $record->status ?? '-' }}</div>
+                <div class="text-sm text-muted">{{ $record->status_jemaat ?? '-' }}</div>
             </div>
 
             <div class="pt-2 text-sm space-y-3">
