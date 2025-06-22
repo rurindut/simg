@@ -123,7 +123,7 @@ class ClusterResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('Pengaturan');
+        return __('Data Pastoral');
     }
 
     public static function getNavigationLabel(): string {

@@ -40,7 +40,7 @@ class OrganizationResource extends Resource
         return $form
             ->schema([
                 FileUpload::make('logo')
-                    ->label('Logo Organisasi')
+                    ->label('Logo')
                     ->image()
                     ->imagePreviewHeight('150')
                     ->directory('organization-logos')
@@ -50,7 +50,7 @@ class OrganizationResource extends Resource
                     ->columnSpan(1),
 
                 TextInput::make('name')
-                    ->label('Nama Organisasi')
+                    ->label('Nama Gereja')
                     ->required(),
 
                 TextInput::make('initial')
@@ -122,15 +122,15 @@ class OrganizationResource extends Resource
     }
 
     public static function getNavigationLabel(): string {
-        return 'Profil Organisasi';
+        return 'Gereja';
     }
 
     public static function getPluralLabel(): string {
-        return 'Profil Organisasi';
+        return 'Gereja';
     }
 
     public static function getModelLabel(): string {
-        return 'Organisasi';
+        return 'Gereja';
     }
 
     public static function shouldRegisterNavigation(): bool

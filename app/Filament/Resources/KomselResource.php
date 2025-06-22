@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\RegionResource\Pages;
-use App\Filament\Resources\RegionResource\RelationManagers;
-use App\Models\Region;
+use App\Filament\Resources\KomselResource\Pages;
+use App\Filament\Resources\KomselResource\RelationManagers;
+use App\Models\Komsel;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -13,12 +13,11 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class RegionResource extends Resource
+class KomselResource extends Resource
 {
-    protected static ?string $model = Region::class;
+    protected static ?string $model = Komsel::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-map';
-    protected static ?int $navigationSort = 2;
+    protected static ?string $navigationIcon = 'heroicon-o-chat-bubble-bottom-center-text';
 
     public static function form(Form $form): Form
     {
@@ -27,12 +26,15 @@ class RegionResource extends Resource
                 Forms\Components\Select::make('organization_id')
                     ->label('Organisasi')
                     ->relationship('organization', 'name')
+                    ->preload()
                     ->searchable()
-                    ->visible(fn () => auth()->user()?->is_super_admin ?? false)
-                    ->required(fn () => auth()->user()?->is_super_admin ?? false),
-                Forms\Components\TextInput::make('name')
+                    ->required()
+                    ->visible(fn () => auth()->user()?->is_super_admin),
+                Forms\Components\TextInput::make('nama')
                     ->required()
                     ->maxLength(255),
+                Forms\Components\Textarea::make('keterangan')
+                    ->label('Keterangan'),
             ]);
     }
 
@@ -40,12 +42,10 @@ class RegionResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name')
+                Tables\Columns\TextColumn::make('nama')
                     ->sortable()
                     ->searchable(),
-                Tables\Columns\TextColumn::make('organization.name')
-                    ->label('Organisasi')
-                    ->visible(fn () => auth()->user()?->hasRole('super_admin'))
+                Tables\Columns\TextColumn::make('keterangan')
                     ->sortable()
                     ->searchable(),
             ])
@@ -72,9 +72,9 @@ class RegionResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListRegions::route('/'),
-            'create' => Pages\CreateRegion::route('/create'),
-            'edit' => Pages\EditRegion::route('/{record}/edit'),
+            'index' => Pages\ListKomsels::route('/'),
+            'create' => Pages\CreateKomsel::route('/create'),
+            'edit' => Pages\EditKomsel::route('/{record}/edit'),
         ];
     }
 
@@ -84,31 +84,19 @@ class RegionResource extends Resource
     }
 
     public static function getNavigationLabel(): string {
-        return 'Wilayah';
+        return 'Komsel';
     }
 
     public static function getPluralLabel(): string {
-        return 'Wilayah';
+        return 'Komsel';
     }
 
     public static function getModelLabel(): string {
-        return 'Wilayah';
-    }
-
-    public static function getEloquentQuery(): Builder
-    {
-        $query = parent::getEloquentQuery();
-
-        if (!auth()->user()->is_super_admin) {
-            $query->where('organization_id', auth()->user()->organization_id);
-        }
-
-        return $query;
+        return 'Komsel';
     }
 
     public static function canViewAny(): bool
     {
-        return auth()->user()->is_super_admin || auth()->user()?->can('view_any_region');
+        return auth()->user()->is_super_admin || auth()->user()?->can('view_any_daftar::komsel');
     }
-
 }

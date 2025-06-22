@@ -17,4 +17,9 @@ class Organization extends Model
     {
         return $this->hasMany(Region::class);
     }
+
+    public function jadwalIbadahs()
+    {
+        return $this->hasMany(JadwalIbadah::class);
+    }
 }

@@ -97,15 +97,32 @@ class AnggotaResource extends Resource
                         'simpatisan' => 'warning',
                         default => 'gray',
                     })
-                    ->sortable(),
+                    ->sortable()
+                    ->searchable(),
 
                 TextColumn::make('organization.name')
                     ->label('Organisasi')
-                    ->visible(fn () => auth()->user()?->is_super_admin),
+                    ->visible(fn () => auth()->user()?->is_super_admin)
+                    ->searchable(),
             ])
             ->defaultSort('nama')
             ->filters([
-                //
+                Tables\Filters\Filter::make('usia')
+                ->form([
+                    Forms\Components\TextInput::make('min')->label('Usia Min')->numeric(),
+                    Forms\Components\TextInput::make('max')->label('Usia Max')->numeric(),
+                ])
+                ->query(function (Builder $query, array $data) {
+                    if ($data['min']) {
+                        $query->whereDate('tanggal_lahir', '<=', now()->subYears($data['min'])->toDateString());
+                    }
+
+                    if ($data['max']) {
+                        $query->whereDate('tanggal_lahir', '>=', now()->subYears($data['max'] + 1)->addDay()->toDateString());
+                    }
+
+                    return $query;
+                }),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make()->label('Detail'),
@@ -388,7 +405,32 @@ class AnggotaResource extends Resource
             Select::make('status_jemaat')->options([
                 'anggota' => 'Anggota',
                 'simpatisan' => 'Simpatisan',
-            ])->columnSpan(1),
+            ])->columnSpan(2),
+            Select::make('komsel_id')
+            ->label('Komsel')
+            ->relationship('komsel', 'nama')
+            ->searchable()
+            ->preload()
+            ->options(function (callable $get) {
+                $organizationId = $get('organization_id') ?? auth()->user()->organization_id;
+                if (!$organizationId) return [];
+
+                return \App\Models\Komsel::where('organization_id', $organizationId)
+                    ->pluck('nama', 'id')
+                    ->toArray();
+            })
+            ->columnSpan(1),
+            Select::make('pelayanans')
+            ->label('Pelayanan')
+            ->relationship('pelayanans', 'nama')
+            ->multiple()
+            ->searchable()
+            ->preload()
+            ->createOptionForm([
+                TextInput::make('nama')->label('Nama Pelayanan')->required(),
+            ])
+            ->getOptionLabelFromRecordUsing(fn ($record) => $record->nama)
+            ->columnSpan(1),
         ])->columns(4),
         Section::make()
             ->schema([

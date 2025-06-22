@@ -100,4 +100,11 @@ class Anggota extends Model
         return $this->belongsTo(\App\Models\Organization::class);
     }
 
+    public function komsel() { return $this->belongsTo(Komsel::class); }
+
+    public function pelayanans()
+    {
+        return $this->belongsToMany(DaftarPelayanan::class, 'anggota_pelayanans');
+    }
+
 }

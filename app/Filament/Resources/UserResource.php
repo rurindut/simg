@@ -64,6 +64,7 @@ class UserResource extends Resource
                     ->searchable()
                     ->visible(fn () => auth()->user()?->is_super_admin ?? false)
                     ->required(fn () => auth()->user()?->is_super_admin ?? false),
+
                 Forms\Components\Select::make('roles')
                     ->relationship('roles', 'name')
                     ->options(function () {
@@ -77,6 +78,16 @@ class UserResource extends Resource
                     ->preload()
                     ->searchable()
                     ->required(),
+
+                Forms\Components\Textarea::make('alamat')
+                    ->label('Alamat')
+                    ->maxLength(255)
+                    ->nullable(),
+                
+                Forms\Components\TextInput::make('no_telp')
+                    ->label('No. Telepon')
+                    ->maxLength(20)
+                    ->nullable(),
             ]);
     }
 
@@ -96,12 +107,19 @@ class UserResource extends Resource
                     ->sortable()
                     ->searchable(),
 
+                Tables\Columns\TextColumn::make('alamat')
+                    ->label('Alamat')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('no_telp')
+                    ->label('No. Telepon')
+                    ->searchable(),
+
                 Tables\Columns\TextColumn::make('created_at')
                     ->sortable()
                     ->dateTime(),
                 
                 Tables\Columns\TextColumn::make('organization.name')
-                    ->label('Organisasi')
+                    ->label('Gereja')
                     ->visible(fn () => auth()->user()?->hasRole('super_admin'))
                     ->sortable()
                     ->searchable(),
@@ -156,7 +174,7 @@ class UserResource extends Resource
     public static function getNavigationGroup(): ?string
     {
         return Utils::isResourceNavigationGroupEnabled()
-            ? __('Pengguna & Akses')
+            ? __('Pengaturan')
             : '';
     }
 
