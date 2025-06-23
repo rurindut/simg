@@ -12,4 +12,10 @@ class DaftarPelayanan extends Model
     {
         return $this->belongsToMany(Anggota::class, 'anggota_pelayanans');
     }
+
+    public function jadwalPetugas()
+    {
+        return $this->hasMany(JadwalPetugas::class, 'daftar_pelayanan_id');
+    }
+
 }

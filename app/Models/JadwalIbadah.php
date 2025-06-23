@@ -16,6 +16,11 @@ class JadwalIbadah extends Model
     
     public function organization()
     {
-        return $this->belongsTo(Organization::class);
+        return $this->belongsTo(Organization::class, 'organization_id');
+    }
+
+    public function jadwalPetugas()
+    {
+        return $this->hasMany(JadwalPetugas::class, 'jadwal_ibadah_id');
     }
 }

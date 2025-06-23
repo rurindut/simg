@@ -107,4 +107,9 @@ class Anggota extends Model
         return $this->belongsToMany(DaftarPelayanan::class, 'anggota_pelayanans');
     }
 
+    public function jadwalPetugas()
+    {
+        return $this->hasMany(JadwalPetugas::class);
+    }
+
 }
