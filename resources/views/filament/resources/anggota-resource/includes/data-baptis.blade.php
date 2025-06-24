@@ -40,7 +40,7 @@
                     <div class="md:col-span-2">
                         <p><span class="font-semibold">Alamat Gereja</span><br>
                         
-                            {{ $record->baptisAnak->alamat_gereja ?? '-' }}
+                            {{ $record->baptisAnak->alamat ?? '-' }}
                         </p>
                     </div>
                 </div>
@@ -98,7 +98,7 @@
                     <div class="md:col-span-2">
                         <p><span class="font-semibold">Alamat Gereja</span><br>
                         
-                            {{ $record->baptisSidi->alamat_gereja ?? '-' }}
+                            {{ $record->baptisSidi->alamat ?? '-' }}
                         </p>
                     </div>
                 </div>

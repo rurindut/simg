@@ -12,4 +12,9 @@ class Pekerjaan extends Model
     {
         return $this->belongsTo(Anggota::class);
     }
+
+    public function profesi()
+    {
+        return $this->belongsTo(Profesi::class);
+    }
 }

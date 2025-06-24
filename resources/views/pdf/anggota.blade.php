@@ -364,6 +364,9 @@
                         <td></td>
                         <td></td>
                         <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
                     </tr>
                 @endfor
             @endforelse
@@ -465,7 +468,11 @@
                 @for ($i = 1; $i <= 2; $i++)
                     <tr>
                         <td style="text-align: center;">{{ $i }}</td>
-                        <td colspan="5">&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
                     </tr>
                 @endfor
             @endforelse
@@ -564,6 +571,8 @@
                 @for ($i = 0; $i < 3; $i++)
                     <tr>
                         <td style="padding: 16px;">&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
                         <td>&nbsp;</td>
                         <td>&nbsp;</td>
                         <td>&nbsp;</td>

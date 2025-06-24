@@ -32,6 +32,8 @@ use Filament\Notifications\Notification;
 use Filament\Forms\Set;
 use Filament\Forms\Get;
 use App\Models\Kota;
+// use Filament\Actions\Imports\ImportAction;
+// use App\Filament\Imports\AnggotaImporter;
 
 class AnggotaResource extends Resource
 {
@@ -97,15 +99,32 @@ class AnggotaResource extends Resource
                         'simpatisan' => 'warning',
                         default => 'gray',
                     })
-                    ->sortable(),
+                    ->sortable()
+                    ->searchable(),
 
                 TextColumn::make('organization.name')
                     ->label('Organisasi')
-                    ->visible(fn () => auth()->user()?->is_super_admin),
+                    ->visible(fn () => auth()->user()?->is_super_admin)
+                    ->searchable(),
             ])
             ->defaultSort('nama')
             ->filters([
-                //
+                Tables\Filters\Filter::make('usia')
+                ->form([
+                    Forms\Components\TextInput::make('min')->label('Usia Min')->numeric(),
+                    Forms\Components\TextInput::make('max')->label('Usia Max')->numeric(),
+                ])
+                ->query(function (Builder $query, array $data) {
+                    if ($data['min']) {
+                        $query->whereDate('tanggal_lahir', '<=', now()->subYears($data['min'])->toDateString());
+                    }
+
+                    if ($data['max']) {
+                        $query->whereDate('tanggal_lahir', '>=', now()->subYears($data['max'] + 1)->addDay()->toDateString());
+                    }
+
+                    return $query;
+                }),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make()->label('Detail'),
@@ -214,23 +233,29 @@ class AnggotaResource extends Resource
                     column: 'nia',
                     ignoreRecord: true
                 )
-                ->required()
+                ->required(fn (Get $get) => $get('status_jemaat') === 'anggota')
                 ->validationMessages([
+                    'required' => 'NIA wajib diisi untuk anggota.',
                     'unique' => 'NIA sudah digunakan.',
                 ])
                 ->columnSpan(2),
+
             TextInput::make('nik')->columnSpan(2),
             Select::make('sapaan')->options([
-                'bapak' => 'Bapak',
+                'bpk' => 'Bapak',
                 'ibu' => 'Ibu',
-                'saudara' => 'Saudara',
-                'saudari' => 'Saudari',
+                'sdr' => 'Saudara',
+                'sdri' => 'Saudari',
+                'anak' => 'Anak',
             ])
             ->required()
             ->live()
+            ->afterStateHydrated(function ($state, callable $set) {
+                $set('jenis_kelamin', in_array(strtolower($state), ['bapak', 'saudara', 'bpk', 'sdr']) ? 'laki-laki' : 'perempuan');
+            })
             ->afterStateUpdated(fn ($state, callable $set) => $set(
                 'jenis_kelamin',
-                in_array($state, ['bapak', 'saudara']) ? 'laki-laki' : 'perempuan'
+                in_array(strtolower($state), ['bapak', 'saudara', 'bpk', 'sdr']) ? 'laki-laki' : 'perempuan'
             ))
             ->columnSpan(1),
             TextInput::make('nama')->required()->columnSpan(2),
@@ -259,8 +284,8 @@ class AnggotaResource extends Resource
                 ->columnSpan(2),
             DatePicker::make('tanggal_lahir')->required()->columnSpan(1),
             Select::make('status_perkawinan')->options([
-                'kawin' => 'Kawin',
-                'belum_kawin' => 'Belum Kawin',
+                'menikah' => 'Menikah',
+                'belum_menikah' => 'Belum Menikah',
                 'cerai_hidup' => 'Cerai Hidup',
                 'cerai_mati' => 'Cerai Mati',
             ])->columnSpan(1),
@@ -342,7 +367,9 @@ class AnggotaResource extends Resource
             Select::make('status_hidup')->options([
                 'hidup' => 'Hidup',
                 'meninggal' => 'Meninggal',
-            ])->columnSpan(2),
+            ])
+            ->required()
+            ->columnSpan(2),
         ])->columns(4),
         Section::make()
             ->schema([
@@ -388,7 +415,9 @@ class AnggotaResource extends Resource
             Select::make('status_jemaat')->options([
                 'anggota' => 'Anggota',
                 'simpatisan' => 'Simpatisan',
-            ])->columnSpan(1),
+            ])
+            ->required()
+            ->columnSpan(1),
         ])->columns(4),
         Section::make()
             ->schema([
@@ -664,7 +693,7 @@ class AnggotaResource extends Resource
                 ])
                 ->columns(2),
 
-            Section::make('anaks')
+            Section::make('Data Anak')
                 ->label('Data Anak')
                 ->schema([
                     Repeater::make('anaks')
@@ -785,8 +814,18 @@ class AnggotaResource extends Resource
                     ->relationship('pekerjaans')
                     ->defaultItems(0)
                     ->schema([
-                        TextInput::make('profesi')->required(),
-                        TextInput::make('kantor')->label('Nama Kantor')->required(),
+                        Select::make('profesi')
+                        ->label('Profesi')
+                        ->relationship('profesi', 'name')
+                        ->required()
+                        ->searchable()
+                        ->preload()
+                        ->createOptionForm([
+                            TextInput::make('name')->label('Profesi')->required(),
+                        ])
+                        ->getOptionLabelFromRecordUsing(fn ($record) => $record->name)
+                        ->columnSpan(1),
+                        TextInput::make('kantor')->label('Nama Kantor'),
                         Textarea::make('alamat')->nullable(),
                         TextInput::make('bagian')->nullable(),
                         TextInput::make('jabatan')->nullable(),
