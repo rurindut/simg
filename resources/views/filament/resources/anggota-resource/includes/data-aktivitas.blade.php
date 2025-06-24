@@ -65,7 +65,7 @@
                 @foreach ($record->pekerjaans as $item)
                     <div class="border p-3 rounded-md bg-gray-50 dark:bg-gray-900 dark:border-gray-800 grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
                         <div class="space-y-2">
-                            <p><span class="font-semibold">Profesi:</span><br> {{ $item->profesi ?? '-' }}</p>
+                            <p><span class="font-semibold">Profesi:</span><br> {{ $item->profesi->name ?? '-' }}</p>
                         </div>
                         <div class="space-y-2">
                             <p><span class="font-semibold">Kantor:</span><br> {{ $item->kantor ?? '-' }}</p>

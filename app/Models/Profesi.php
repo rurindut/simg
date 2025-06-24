@@ -7,4 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 class Profesi extends Model
 {
     protected $guarded = [];
+
+    public function pekerjaans()
+    {
+        return $this->hasMany(Pekerjaan::class);
+    }
 }
