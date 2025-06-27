@@ -75,6 +75,33 @@ class Anggota extends Model
         return $this->hasOne(Pasangan::class);
     }
 
+    public function getPernikahanAktifAttribute()
+    {
+        return $this->hasOne(\App\Models\Pernikahan::class, 'anggota_id_suami')
+        ->orWhere('anggota_id_istri', $this->id)->first();
+    }
+
+    public function getNamaPasanganAttribute()
+    {
+        $p = $this->pernikahan_aktif;
+
+        if (! $p) return '-';
+
+        return $this->nia === $p->nia_suami
+            ? $p->nama_istri
+            : $p->nama_suami;
+    }
+
+    public function sebagaiSuami()
+    {
+        return $this->hasMany(Pernikahan::class, 'anggota_id_suami');
+    }
+
+    public function sebagaiIstri()
+    {
+        return $this->hasMany(Pernikahan::class, 'anggota_id_istri');
+    }
+
     public function anaks()
     {
         return $this->hasMany(Anak::class, 'anggota_id');

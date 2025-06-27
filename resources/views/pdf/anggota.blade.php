@@ -398,20 +398,23 @@
     </div>
 
     <!-- Pernikahan -->
+    @php
+        $pernikahan = $record->pernikahan_aktif ?? null;
+    @endphp
     <div class="section">
         <h4 style="margin-top: 20px;">JIKA MENIKAH (atau pernah menikah)</h4>
         <table class="form-table">
             <tr>
                 <td class="label">Nama Istri / Suami:</td>
-                <td class="value">{{ $record->pasangan?->nama ?? '-' }}</td>
+                <td class="value">{{ $record->jenis_kelamin === 'Laki-laki' ? $pernikahan->nama_istri : $pernikahan->nama_suami }}</td>
                 <td class="label">Tanggal Catatan Sipil:</td>
-                <td class="value">{{ $record->pasangan?->tanggal_catatan_sipil ? \Carbon\Carbon::parse($record->pasangan->tanggal_catatan_sipil)->format('d M Y') : '-' }}]</td>
+                <td class="value">{{ $pernikahan?->tanggal_catatan_sipil ? \Carbon\Carbon::parse($pernikahan->tanggal_catatan_sipil)->format('d M Y') : '-' }}]</td>
             </tr>
             <tr>
                 <td class="label">No. Akta Nikah:</td>
-                <td class="value">{{ $record->pasangan?->nomor_akta_nikah ?? '-' }}</td>
+                <td class="value">{{ $pernikahan?->nomor_akta_nikah ?? '-' }}</td>
                 <td class="label">Tempat Catatan Sipil:</td>
-                <td class="value">{{ $record->pasangan?->tempat_catatan_sipil ?? '-' }}</td>
+                <td class="value">{{ $pernikahan?->tempat_catatan_sipil ?? '-' }}</td>
             </tr>
         </table>
     </div>
@@ -422,19 +425,19 @@
         <table class="form-table">
             <tr>
                 <td class="label">Tanggal:</td>
-                <td class="value">{{ $record->pasangan?->tanggal_pemberkatan ? \Carbon\Carbon::parse($record->pasangan->tanggal_pemberkatan)->format('d/m/Y') : '-' }}</td>
+                <td class="value">{{ $pernikahan?->tanggal_pemberkatan ? \Carbon\Carbon::parse($pernikahan->tanggal_pemberkatan)->format('d/m/Y') : '-' }}</td>
                 <td class="label">Oleh Pendeta:</td>
-                <td class="value">{{ $record->pasangan?->pendeta_pemberkatan ?? '-' }}</td>
+                <td class="value">{{ $pernikahan?->pendeta_pemberkatan ?? '-' }}</td>
             </tr>
             <tr>
                 <td class="label">No. Piagam:</td>
-                <td class="value">{{ $record->pasangan?->no_piagam ?? '-' }}</td>
+                <td class="value">{{ $pernikahan?->no_piagam ?? '-' }}</td>
                 <td class="label">Gereja:</td>
-                <td class="value">{{ $record->pasangan?->gereja ?? '-' }}</td>
+                <td class="value">{{ $pernikahan?->gereja ?? '-' }}</td>
             </tr>
             <tr>
                 <td class="label">Alamat Gereja:</td>
-                <td class="value" colspan="3">{{ $record->pasangan?->alamat_gereja ?? '-' }}</td>
+                <td class="value" colspan="3">{{ $pernikahan?->alamat_gereja ?? '-' }}</td>
             </tr>
         </table>
     </div>
