@@ -5,8 +5,10 @@ namespace App\Filament\Pages;
 use App\Models\Anggota;
 use App\Models\Atestasi;
 use App\Models\Organization;
+use App\Models\OrangTua;
 use App\Models\Pekerjaan;
 use App\Models\Pendidikan;
+use App\Models\Pernikahan;
 use App\Models\Region;
 use App\Models\Suku;
 use Carbon\Carbon;
@@ -147,6 +149,9 @@ class ImportAnggota extends Page
             $rows = array_map('str_getcsv', file($fullPath));
             $header = array_map('trim', array_shift($rows));
 
+            $dataPernikahan = [];
+            $dataOrangtua = [];
+
             foreach ($rows as $row) {
                 $data = array_combine($header, $row);
 
@@ -272,27 +277,24 @@ class ImportAnggota extends Page
                 }
 
                 if (!empty($data['nama_pasangan'])) {
-                    $niaPasangan = trim($data['Anggt pasangan'] ?? '');
-                    $pasanganId = null;
+
+                    $isLaki = strtolower($anggota->jenis_kelamin) === 'laki-laki';
+
+                    $idPasangan = null;
                     $namaPasangan = trim($data['nama_pasangan'] ?? '');
+                    $niaPasangan = trim($data['Anggt pasangan'] ?? '');
 
-                    // $pasanganNia = '';
-                    if ($niaPasangan !== '') {
-                        $pasanganNia = 'NIA-' . $niaPasangan;
-                        $pasangan = Anggota::where('nia', $pasanganNia)->first();
-                        if ($pasangan) {
-                            // $pasanganId = $pasangan->id;
-                            $niaPasangan = $pasanganNia;
-                            $namaPasangan = $pasangan->nama;
-                        } else {
-                            $niaPasangan = '';
-                        }
-                    }
+                    $niaPasangan = ($niaPasangan && is_numeric($niaPasangan)) ? 'NIA-' . $niaPasangan : NULL;
 
-                    // Simpan data pasangan
-                    $anggota->pasangan()->updateOrCreate([], [
-                        'nia'               => $niaPasangan ?? null,
-                        'nama'              => $namaPasangan ?? null,
+                    $dataPernikahan[$anggota->id] = [
+                        'nia_suami' => $isLaki ? $anggota->nia : ($niaPasangan ?? null),
+                        'nama_suami' => $isLaki ? $anggota->nama : ($namaPasangan ?? null),
+                        'anggota_id_suami' => $isLaki ? $anggota->id : ($idPasangan ?? null),
+                
+                        'nia_istri' => !$isLaki ? $anggota->nia : ($niaPasangan ?? null),
+                        'nama_istri' => !$isLaki ? $anggota->nama : ($namaPasangan ?? null),
+                        'anggota_id_istri' => !$isLaki ? $anggota->id : ($idPasangan ?? null),
+                
                         'no_akta_nikah'     => $data['no Akte nikah'] ?? null,
                         'tanggal_catatan_sipil' => $this->tryParseDate($data['sipil_tgl']),
                         'tempat_catatan_sipil'  => $data['sipil_kota'] ?? null,
@@ -301,98 +303,53 @@ class ImportAnggota extends Page
                         'pendeta'               => $data['dinikahkan pendeta'] ?? null,
                         'gereja'            => $data['Menikah di'] ?? null,
                         'alamat_gereja'     => $data['nikah_alamat'] ?? null,
-                    ]);
+                    ];
                 }
 
                 if(!empty($data['n_ayah'])) {
                     $niaAyah = trim($data['angta ayah'] ?? '');
                     $namaAyah = trim($data['n_ayah'] ?? '');
                     $ayahId = null;
-
-                    if ($niaAyah !== '') {
-                        $ayahNia = 'NIA-' . $niaAyah;
-                        $ayah = Anggota::where('nia', $ayahNia)->first();
-                        if ($ayah) {
-                            $niaAyah = $ayahNia;
-                            $namaAyah = $ayah->nama;
-                            $ayahId = $ayah->id;
-                        } else {
-                            $niaAyah = '';
-                        }
-                    }
-
-                    $anggota->ayah()->updateOrCreate(
-                        ['hubungan' => 'ayah'],
-                        [
-                            'nia' => $niaAyah ?? null,
-                            'nama' => $namaAyah ?? null,
+                    $niaAyah = ($niaAyah && is_numeric($niaAyah)) ? 'NIA-' . $niaAyah : NULL;
+                    $dataOrangtua[] = [
+                        'anggota_id' => $anggota->id,
+                        'hubungan' => 'ayah',
+                        'nia' => $niaAyah ?? null,
+                        'nama' => $namaAyah ?? null,
+                        'anak' => [
+                            'anggota_id' => $anggota->id,
+                            'nia'    => $anggota->nia,
+                            'nama' => $anggota->nama,
+                            'tempat_lahir'          => $anggota->tempat_lahir ?? null,
+                            'tanggal_lahir'         => $this->tryParseDate($anggota->tanggal_lahir),
+                            'jenis_kelamin'         => strtolower($anggota->jenis_kelamin),
+                            'jemaat'                => null,
+                            'alamat'                => $anggota->alamat_domisili,
                         ]
-                    );
+                    ];
                 }
-
+                
                 if(!empty($data['n_ibu'])) {
                     $niaIbu = trim($data['anggota Ibu'] ?? '');
                     $ibuId = null;
                     $namaIbu = trim($data['n_ibu'] ?? '');
-
-                    if ($niaIbu !== '') {
-                        $ibuNia = 'NIA-' . $niaIbu;
-                        $ibu = Anggota::where('nia', $ibuNia)->first();
-                        if ($ibu) {
-                            $niaIbu = $ibuNia;
-                            $namaIbu = $ibu->nama;
-                        } else {
-                            $niaIbu = '';
-                        }
-                    }
-
-                    $anggota->ibu()->updateOrCreate(
-                        ['hubungan' => 'ibu'],
-                        [
-                            'nia' => $niaIbu ?? null,
-                            'nama' => $namaIbu ?? null,
+                    $niaIbu = ($niaIbu && is_numeric($niaIbu)) ? 'NIA-' . $niaIbu : NULL;
+                    $dataOrangtua[] = [
+                        'anggota_id' => $anggota->id,
+                        'hubungan' => 'ibu',
+                        'nia' => $niaIbu ?? null,
+                        'nama' => $namaIbu ?? null,
+                        'anak' => [
+                            'anggota_id' => $anggota->id,
+                            'nia'    => $anggota->nia,
+                            'nama' => $anggota->nama,
+                            'tempat_lahir'          => $anggota->tempat_lahir ?? null,
+                            'tanggal_lahir'         => $this->tryParseDate($anggota->tanggal_lahir),
+                            'jenis_kelamin'         => strtolower($anggota->jenis_kelamin),
+                            'jemaat'                => null,
+                            'alamat'                => $anggota->alamat_domisili,
                         ]
-                    );
-                }
-
-                if(!empty($data['Kel.'])) {
-                    if($niaAyah == $data['Kel.']) {
-                        if ($ayahId) {
-                            \App\Models\Anak::updateOrCreate(
-                                [
-                                    'anggota_id' => $ayahId,
-                                    'nia'    => $anggota->nia,
-                                ],
-                                [
-                                    'nama' => $anggota->nama,
-                                    'tempat_lahir'          => $anggota->tempat_lahir ?? null,
-                                    'tanggal_lahir'         => $this->tryParseDate($anggota->tanggal_lahir),
-                                    'jenis_kelamin'         => strtolower($anggota->jenis_kelamin),
-                                    'jemaat'                => null,
-                                    'alamat'                => $anggota->alamat_domisili,
-                        
-                                ]
-                            );
-                        }
-                    } else if($niaIbu == $data['Kel.']) {
-                        if ($ibuId) {
-                            \App\Models\Anak::updateOrCreate(
-                                [
-                                    'anggota_id' => $ibuId,
-                                    'nia'    => $anggota->nia,
-                                ],
-                                [
-                                    'nama' => $anggota->nama,
-                                    'tempat_lahir'          => $anggota->tempat_lahir ?? null,
-                                    'tanggal_lahir'         => $this->tryParseDate($anggota->tanggal_lahir),
-                                    'jenis_kelamin'         => strtolower($anggota->jenis_kelamin),
-                                    'jemaat'                => null,
-                                    'alamat'                => $anggota->alamat_domisili,
-                        
-                                ]
-                            );
-                        }
-                    }
+                    ];
                 }
 
                 $atestasiData = [
@@ -444,6 +401,111 @@ class ImportAnggota extends Page
 
                 }
 
+            }
+
+            # import data keluarga
+            if(!empty($dataPernikahan)) {
+                foreach($dataPernikahan as $pernikahan) {
+                    $existingMarriage = [];
+                    if(!empty($pernikahan['anggota_id_suami'])) {
+                        # data pernikahan anggota sebagai suami
+                        if (!empty($pernikahan['nia_istri'])) {
+                            $istri = Anggota::where('nia', $pernikahan['nia_istri'])->first();
+                            if ($istri) {
+                                $pernikahan['anggota_id_istri'] = $istri->id;
+                                $pernikahan['nama_istri'] = $istri->nama;
+                            }
+                        } else {
+                            if(!empty($pernikahan['nama_istri'])) {
+                                $istri = Anggota::where('nama', $pernikahan['nama_istri'])->first();
+                                if ($istri) {
+                                    $pernikahan['anggota_id_istri'] = $istri->id;
+                                    $pernikahan['nia_istri'] = $istri->nia;
+                                }
+                            }
+                        }
+                        $existingMarriage = Pernikahan::where('anggota_id_suami', $pernikahan['anggota_id_suami'])
+                        ->first();
+                    } else if(!empty($pernikahan['anggota_id_istri'])) {
+                        # data pernikahan anggota sebagai istri
+                        if (!empty($pernikahan['nia_suami'])) {
+                            $suami = Anggota::where('nia', $pernikahan['nia_suami'])->first();
+                            if ($suami) {
+                                $pernikahan['anggota_id_suami'] = $suami->id;
+                                $pernikahan['nama_suami'] = $suami->nama;
+                            }
+                        } else {
+                            if(!empty($pernikahan['nama_suami'])) {
+                                $suami = Anggota::where('nama', $pernikahan['nama_suami'])->first();
+                                if ($suami) {
+                                    $pernikahan['anggota_id_suami'] = $suami->id;
+                                    $pernikahan['nia_suami'] = $suami->nia;
+                                }
+                            }
+                        }
+                        $existingMarriage = Pernikahan::where('anggota_id_istri', $pernikahan['anggota_id_istri'])
+                        ->first();
+                    }
+                    if ($existingMarriage) {
+                        $existingMarriage->update($pernikahan);
+                    } else {
+                        Pernikahan::create($pernikahan);
+                    }
+                }
+            }
+
+            if(!empty($dataOrangtua)) {
+                foreach($dataOrangtua as $orangTua) {
+                    $namaOrtu = $orangTua['nama'];
+                    $ortuId = null;
+                    if (!empty($orangTua['nia'])) {
+                        $ortu = Anggota::where('nia', $orangTua['nia'])->first();
+                        if ($ortu) {
+                            $namaOrtu = $ortu->nama;
+                            $ortuId = $ortu->id;
+                        }
+                    }
+
+                    \App\Models\OrangTua::updateOrCreate(
+                        [
+                            'anggota_id' => $orangTua['anggota_id'],
+                            'hubungan'    => $orangTua['hubungan'],
+                        ],
+                        [
+                            'nia'   => $orangTua['nia'],
+                            'nama'  => $orangTua['nama'],
+                        ]
+                    );
+
+                    $dataAnak = $orangTua['anak'];
+                    $bindAnak = [
+                        'nia'               => $dataAnak['nia'],
+                        'nama'              => $dataAnak['nama'],
+                        'tempat_lahir'      => $dataAnak['tempat_lahir'],
+                        'tanggal_lahir'     => $dataAnak['tanggal_lahir'],
+                        'jenis_kelamin'     => $dataAnak['jenis_kelamin'],
+                        'jemaat'            => $dataAnak['jemaat'],
+                        'alamat'            => $dataAnak['alamat'],
+                    ];
+                    if($orangTua['hubungan'] == 'ayah' && !empty($ortuId)) {
+                        $bindAnak['ayah_id'] = $ortuId;
+                        \App\Models\Anak::updateOrCreate(
+                            [
+                                'anggota_id' => $dataAnak['anggota_id'],
+                            ],
+                            $bindAnak
+                        );
+                    }
+                    if($orangTua['hubungan'] == 'ibu' && !empty($ortuId)) {
+                        $bindAnak['ibu_id'] = $ortuId;
+                        \App\Models\Anak::updateOrCreate(
+                            [
+                                'anggota_id' => $dataAnak['anggota_id'],
+                            ],
+                            $bindAnak
+                        );
+                    }
+                }
             }
 
             Notification::make()
