@@ -316,6 +316,16 @@ class ImportAnggota extends Page
                         'hubungan' => 'ayah',
                         'nia' => $niaAyah ?? null,
                         'nama' => $namaAyah ?? null,
+                        'anak' => [
+                            'anggota_id' => $anggota->id,
+                            'nia'    => $anggota->nia,
+                            'nama' => $anggota->nama,
+                            'tempat_lahir'          => $anggota->tempat_lahir ?? null,
+                            'tanggal_lahir'         => $this->tryParseDate($anggota->tanggal_lahir),
+                            'jenis_kelamin'         => strtolower($anggota->jenis_kelamin),
+                            'jemaat'                => null,
+                            'alamat'                => $anggota->alamat_domisili,
+                        ]
                     ];
                 }
                 
@@ -329,48 +339,19 @@ class ImportAnggota extends Page
                         'hubungan' => 'ibu',
                         'nia' => $niaIbu ?? null,
                         'nama' => $namaIbu ?? null,
+                        'anak' => [
+                            'anggota_id' => $anggota->id,
+                            'nia'    => $anggota->nia,
+                            'nama' => $anggota->nama,
+                            'tempat_lahir'          => $anggota->tempat_lahir ?? null,
+                            'tanggal_lahir'         => $this->tryParseDate($anggota->tanggal_lahir),
+                            'jenis_kelamin'         => strtolower($anggota->jenis_kelamin),
+                            'jemaat'                => null,
+                            'alamat'                => $anggota->alamat_domisili,
+                        ]
                     ];
                 }
-                /*
-                if(!empty($data['Kel.'])) {
-                    if($niaAyah == $data['Kel.']) {
-                        if ($ayahId) {
-                            \App\Models\Anak::updateOrCreate(
-                                [
-                                    'anggota_id' => $ayahId,
-                                    'nia'    => $anggota->nia,
-                                ],
-                                [
-                                    'nama' => $anggota->nama,
-                                    'tempat_lahir'          => $anggota->tempat_lahir ?? null,
-                                    'tanggal_lahir'         => $this->tryParseDate($anggota->tanggal_lahir),
-                                    'jenis_kelamin'         => strtolower($anggota->jenis_kelamin),
-                                    'jemaat'                => null,
-                                    'alamat'                => $anggota->alamat_domisili,
-                        
-                                ]
-                            );
-                        }
-                    } else if($niaIbu == $data['Kel.']) {
-                        if ($ibuId) {
-                            \App\Models\Anak::updateOrCreate(
-                                [
-                                    'anggota_id' => $ibuId,
-                                    'nia'    => $anggota->nia,
-                                ],
-                                [
-                                    'nama' => $anggota->nama,
-                                    'tempat_lahir'          => $anggota->tempat_lahir ?? null,
-                                    'tanggal_lahir'         => $this->tryParseDate($anggota->tanggal_lahir),
-                                    'jenis_kelamin'         => strtolower($anggota->jenis_kelamin),
-                                    'jemaat'                => null,
-                                    'alamat'                => $anggota->alamat_domisili,
-                                ]
-                            );
-                        }
-                    }
-                }
-                */
+
                 $atestasiData = [
                     [
                         'tipe' => 'masuk',
@@ -476,10 +457,12 @@ class ImportAnggota extends Page
             if(!empty($dataOrangtua)) {
                 foreach($dataOrangtua as $orangTua) {
                     $namaOrtu = $orangTua['nama'];
+                    $ortuId = null;
                     if (!empty($orangTua['nia'])) {
                         $ortu = Anggota::where('nia', $orangTua['nia'])->first();
                         if ($ortu) {
                             $namaOrtu = $ortu->nama;
+                            $ortuId = $ortu->id;
                         }
                     }
 
@@ -493,6 +476,35 @@ class ImportAnggota extends Page
                             'nama'  => $orangTua['nama'],
                         ]
                     );
+
+                    $dataAnak = $orangTua['anak'];
+                    $bindAnak = [
+                        'nia'               => $dataAnak['nia'],
+                        'nama'              => $dataAnak['nama'],
+                        'tempat_lahir'      => $dataAnak['tempat_lahir'],
+                        'tanggal_lahir'     => $dataAnak['tanggal_lahir'],
+                        'jenis_kelamin'     => $dataAnak['jenis_kelamin'],
+                        'jemaat'            => $dataAnak['jemaat'],
+                        'alamat'            => $dataAnak['alamat'],
+                    ];
+                    if($orangTua['hubungan'] == 'ayah' && !empty($ortuId)) {
+                        $bindAnak['ayah_id'] = $ortuId;
+                        \App\Models\Anak::updateOrCreate(
+                            [
+                                'anggota_id' => $dataAnak['anggota_id'],
+                            ],
+                            $bindAnak
+                        );
+                    }
+                    if($orangTua['hubungan'] == 'ibu' && !empty($ortuId)) {
+                        $bindAnak['ibu_id'] = $ortuId;
+                        \App\Models\Anak::updateOrCreate(
+                            [
+                                'anggota_id' => $dataAnak['anggota_id'],
+                            ],
+                            $bindAnak
+                        );
+                    }
                 }
             }
 

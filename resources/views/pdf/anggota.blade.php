@@ -458,7 +458,7 @@
             </tr>
         </thead>
         <tbody>
-            @forelse ($record->anaks as $i => $anak)
+            @forelse ($record->semuaAnak as $i => $anak)
                 <tr>
                     <td style="text-align: center;">{{ $i + 1 }}</td>
                     <td>{{ $anak->nama }}</td>
@@ -563,7 +563,7 @@
         <tbody>
             @forelse ($record->pekerjaans as $pekerjaan)
                 <tr>
-                    <td style="padding: 4px;">{{ $pekerjaan->profesi ?? '-' }}</td>
+                    <td style="padding: 4px;">{{ $pekerjaan->profesi->name ?? '-' }}</td>
                     <td style="padding: 4px;">{{ $pekerjaan->kantor ?? '-' }}</td>
                     <td style="padding: 4px;">{{ $pekerjaan->alamat ?? '-' }}</td>
                     <td style="padding: 4px;">{{ $pekerjaan->bagian ?? '-' }}</td>

@@ -107,6 +107,21 @@ class Anggota extends Model
         return $this->hasMany(Anak::class, 'anggota_id');
     }
 
+    public function anakSebagaiAyah()
+    {
+        return $this->hasMany(Anak::class, 'ayah_id');
+    }
+
+    public function anakSebagaiIbu()
+    {
+        return $this->hasMany(Anak::class, 'ibu_id');
+    }
+
+    public function getSemuaAnakAttribute(): \Illuminate\Support\Collection
+    {
+        return $this->anakSebagaiAyah->merge($this->anakSebagaiIbu)->sortBy('tanggal_lahir')->values();
+    }
+
     public function pengalamanGerejawis()
     {
         return $this->hasMany(PengalamanGerejawi::class, 'anggota_id');

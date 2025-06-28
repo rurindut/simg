@@ -102,9 +102,9 @@
         <x-slot name="heading">Anak</x-slot>
         <x-slot name="description">Data anak dari anggota ini.</x-slot>
 
-        @if ($record->anaks->isNotEmpty())
+        @if ($record->anakSebagaiAyah->isNotEmpty() || $record->anakSebagaiIbu->isNotEmpty())
             <div class="grid grid-cols-1 md:grid-cols-1 gap-4">
-                @foreach ($record->anaks as $anak)
+                @foreach ($record->semuaAnak as $anak)
                 <div class="border p-3 rounded-md bg-gray-50 dark:bg-gray-900 dark:border-gray-800 grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
                     <div class="space-y-2">
                         <p><span class="font-semibold">NIA:</span> <br> {{ $anak->nia ?? '-' }}</p>

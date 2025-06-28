@@ -11,6 +11,7 @@ use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Pages\Actions;
 use Filament\Resources\Pages\Page;
+use Illuminate\Support\Facades\Log;
 
 class EditAnggotaKeluarga extends Page implements HasForms
 {
@@ -55,6 +56,21 @@ class EditAnggotaKeluarga extends Page implements HasForms
             ];
         }
 
+        $dataAnak = [];
+        $anaks = $record->semuaAnak;
+        foreach ($record->semuaAnak as $anak) {
+            $dataAnak[] = [
+                'nia' => $anak->nia,
+                'nama' => $anak->nama,
+                'tempat_lahir' => $anak->tempat_lahir,
+                'tanggal_lahir' => $anak->tanggal_lahir,
+                'jenis_kelamin' => $anak->jenis_kelamin,
+                'jemaat' => $anak->jemaat,
+                'alamat' => $anak->alamat,
+                'nama_disabled' => filled($anak->nia),
+            ];
+        }
+
         $this->form->fill([
             'ayah' => [
                 'id' => $record->ayah?->id,
@@ -69,6 +85,7 @@ class EditAnggotaKeluarga extends Page implements HasForms
                 'nama' => $record->ibu?->nama,
             ],
             'pasangan' => $dataPernikahan,
+            'data_anak' => $dataAnak
         ]);
     }
 
@@ -98,27 +115,63 @@ class EditAnggotaKeluarga extends Page implements HasForms
     public function save()
     {
         $data = $this->form->getState();
+        // Log::debug($data);
+        $bindAnak = [
+            'nia'               => $this->record->nia,
+            'nama'              => $this->record->nama,
+            'tempat_lahir'      => $this->record->tempat_lahir,
+            'tanggal_lahir'     => $this->record->tanggal_lahir,
+            'jenis_kelamin'     => $this->record->jenis_kelamin,
+            'jemaat'            => NULL,
+            'alamat'            => $this->record->alamat_domisili,
+        ];
 
         // Simpan Ayah
         if(!empty($data['ayah']['nama'])) {
-            $this->record->ayah()->updateOrCreate(
+            $ayah = $this->record->ayah()->updateOrCreate(
                 ['hubungan' => 'ayah'],
                 [
                     'nia' => $data['ayah']['nia'] ?? null,
                     'nama' => $data['ayah']['nama'] ?? null,
                 ]
             );
+
+            if (filled($data['ayah']['nia'])) {
+                $dataAyah = Anggota::where('nia', $data['ayah']['nia'])->first();
+                if ($dataAyah) {
+                    $bindAnak['ayah_id'] = $dataAyah->id;
+                    \App\Models\Anak::updateOrCreate(
+                        [
+                            'anggota_id' => $this->record->id,
+                        ],
+                        $bindAnak
+                    );
+                }
+            }
         }
 
         // Simpan Ibu
-        if(!empty($data['ayah']['ibu'])) {
-            $this->record->ibu()->updateOrCreate(
+        if(!empty($data['ibu']['nama'])) {
+            $ibu = $this->record->ibu()->updateOrCreate(
                 ['hubungan' => 'ibu'],
                 [
                     'nia' => $data['ibu']['nia'] ?? null,
                     'nama' => $data['ibu']['nama'] ?? null,
                 ]
             );
+
+            if (filled($data['ibu']['nia'])) {
+                $dataIbu = Anggota::where('nia', $data['ibu']['nia'])->first();
+                if ($dataIbu) {
+                    $bindAnak['ibu_id'] = $dataIbu->id;
+                    \App\Models\Anak::updateOrCreate(
+                        [
+                            'anggota_id' => $this->record->id,
+                        ],
+                        $bindAnak
+                    );
+                }
+            }
         }
 
         if (
@@ -164,6 +217,43 @@ class EditAnggotaKeluarga extends Page implements HasForms
                 $existingMarriage->update($pernikahanData);
             } else {
                 Pernikahan::create($pernikahanData);
+            }
+        }
+
+        if(!empty($data['data_anak'])) {
+            \App\Models\Anak::where('ayah_id', $this->record->id)
+                ->orWhere('ibu_id', $this->record->id)
+                ->delete();
+            foreach ($data['data_anak'] as $anak) {
+                $bindAnakAnggota = [
+                    'nia' => $anak['nia'],
+                    'nama' => $anak['nama'],
+                    'tempat_lahir' => $anak['tempat_lahir'],
+                    'tanggal_lahir' => $anak['tanggal_lahir'],
+                    'jenis_kelamin' => $anak['jenis_kelamin'],
+                    'jemaat' => $anak['jemaat'],
+                    'alamat' => $anak['alamat'],
+                ];
+                $isLaki = $this->record->jenis_kelamin === 'Laki-laki';
+                $existingMarriage = Pernikahan::where(
+                    $isLaki ? 'anggota_id_suami' : 'anggota_id_istri',
+                    $this->record->id
+                )->first();
+                if($isLaki) {
+                    $bindAnakAnggota['ayah_id'] = $this->record->id;
+                    $bindAnakAnggota['ibu_id'] = ($existingMarriage->anggota_id_istri) ?? null;
+                } else {
+                    $bindAnakAnggota['ibu_id'] = $this->record->id;
+                    $bindAnakAnggota['ayah_id'] = ($existingMarriage->anggota_id_suami) ?? null;
+                }
+                if(!empty($anak['nia'])) {
+                    $anakAnggota = Anggota::where('nia', $anak['nia'])->first();
+                    if($anakAnggota) {   
+                        $bindAnakAnggota['anggota_id'] = $anakAnggota->id;
+                    }
+                }
+                Log::debug($bindAnakAnggota);
+                \App\Models\Anak::create($bindAnakAnggota);
             }
         }
 

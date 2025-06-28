@@ -696,9 +696,9 @@ class AnggotaResource extends Resource
             Section::make('Data Anak')
                 ->label('Data Anak')
                 ->schema([
-                    Repeater::make('anaks')
+                    Repeater::make('data_anak')
                         ->label('Anak')
-                        ->relationship('anaks')
+                        // ->relationship('anaks')
                         ->schema([
                             Select::make('nia')
                                 ->label('NIA')
