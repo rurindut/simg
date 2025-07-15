@@ -1,4 +1,4 @@
-@props(['anggota'])
+@props(['anggota', 'currentBrowserPath'])
 
 @php
     $base = "/admin/anggota/{$anggota->id}/edit";
@@ -7,7 +7,7 @@
 <div class="fi-tabs flex max-w-full gap-x-1 overflow-x-auto mx-auto rounded-xl bg-white p-2 shadow-sm ring-1 ring-gray-950/5 dark:bg-gray-900 dark:ring-white/10">
     @php
         $tabs = [
-            'Data Pribadi' => route('filament.admin.resources.anggota.edit', $anggota),
+            'Data Pribadi' => "{$base}/data-pribadi",
             'Data Baptis' => "{$base}/data-baptis",
             'Atestasi' => "{$base}/data-atestasi",
             'Data Keluarga' => "{$base}/data-keluarga",
@@ -19,7 +19,7 @@
     @foreach ($tabs as $label => $url)
 
         @php
-            $current = '/' . ltrim(request()->path(), '/');
+            $current = "{$base}/".$currentBrowserPath;
             $target = '/' . ltrim(parse_url($url, PHP_URL_PATH), '/');
             $isActive = $current === $target;
         @endphp
