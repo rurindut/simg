@@ -5,6 +5,8 @@ namespace App\Filament\Pages;
 use Filament\Pages\Page;
 use App\Filament\Widgets\AnggotaUsiaChart;
 use App\Filament\Widgets\AnggotaGenderChart;
+use App\Filament\Widgets\AnggotaStatusJemaatChart;
+use App\Filament\Widgets\AnggotaAtestasiChart;
 use Filament\Pages\Dashboard as BaseDashboard;
 
 class Dashboard extends BaseDashboard
@@ -16,6 +18,8 @@ class Dashboard extends BaseDashboard
         return [
             AnggotaUsiaChart::class,
             AnggotaGenderChart::class,
+            AnggotaStatusJemaatChart::class,
+            AnggotaAtestasiChart::class,
         ];
     }
 

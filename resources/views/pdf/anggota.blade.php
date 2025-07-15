@@ -406,7 +406,7 @@
         <table class="form-table">
             <tr>
                 <td class="label">Nama Istri / Suami:</td>
-                <td class="value">{{ $record->jenis_kelamin === 'Laki-laki' ? $pernikahan->nama_istri : $pernikahan->nama_suami }}</td>
+                <td class="value">{{ $record->jenis_kelamin === 'Laki-laki' ? ($pernikahan->nama_istri ?? '-') : ($pernikahan->nama_suami ?? '-') }}</td>
                 <td class="label">Tanggal Catatan Sipil:</td>
                 <td class="value">{{ $pernikahan?->tanggal_catatan_sipil ? \Carbon\Carbon::parse($pernikahan->tanggal_catatan_sipil)->format('d M Y') : '-' }}]</td>
             </tr>

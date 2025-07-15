@@ -62,17 +62,17 @@ class EditAnggotaBaptis extends Page implements HasForms
 
         $isAnakFilled = filled($anak['tempat_baptis'] ?? null)
             || filled($anak['tanggal'] ?? null)
-            || filled($anak['no_piagam'] ?? null);
+            || filled($anak['gereja'] ?? null);
 
         $isAnakValid = filled($anak['tempat_baptis'] ?? null)
             && filled($anak['tanggal'] ?? null)
-            && filled($anak['no_piagam'] ?? null);
+            && filled($anak['gereja'] ?? null);
 
         if ($isAnakFilled && ! $isAnakValid) {
-            $this->addError('baptisAnak', 'Data Baptis Anak belum lengkap. Harap isi tempat baptis, tanggal, dan nomor piagam.');
+            $this->addError('baptisAnak', 'Data Baptis Anak belum lengkap. Harap isi tempat baptis, tanggal, dan gereja.');
             Notification::make()
                 ->title('Invalid Data')
-                ->body('Data Baptis Anak belum lengkap. Harap isi tempat baptis, tanggal, dan nomor piagam.')
+                ->body('Data Baptis Anak belum lengkap. Harap isi tempat baptis, tanggal, dan gereja.')
                 ->info()
                 ->send();
             return;
@@ -94,17 +94,17 @@ class EditAnggotaBaptis extends Page implements HasForms
 
         $isSidiFilled = filled($sidi['tempat_baptis'] ?? null)
             || filled($sidi['tanggal'] ?? null)
-            || filled($sidi['no_piagam'] ?? null);
+            || filled($sidi['gereja'] ?? null);
 
         $isSidiValid = filled($sidi['tempat_baptis'] ?? null)
             && filled($sidi['tanggal'] ?? null)
-            && filled($sidi['no_piagam'] ?? null);
+            && filled($sidi['gereja'] ?? null);
 
         if ($isSidiFilled && ! $isSidiValid) {
-            $this->addError('baptisSidi', 'Data Baptis Sidi belum lengkap. Harap isi tempat baptis, tanggal, dan nomor piagam.');
+            $this->addError('baptisSidi', 'Data Baptis Sidi belum lengkap. Harap isi tempat baptis, tanggal, dan gereja.');
             Notification::make()
                 ->title('Invalid Data')
-                ->body('Data Baptis Sidi belum lengkap. Harap isi tempat baptis, tanggal, dan nomor piagam.')
+                ->body('Data Baptis Sidi belum lengkap. Harap isi tempat baptis, tanggal, dan gereja.')
                 ->info()
                 ->send();
             return;
