@@ -556,7 +556,7 @@ class AnggotaResource extends Resource
     public static function dataKeluargaForm(): array
     {
 
-        $options = \App\Models\Anggota::get()->pluck('nia', 'nia')->toArray();
+        $options = \App\Models\Anggota::get()->pluck('nia', 'nia')->filter()->toArray();
 
         return [
             Section::make('Data Orang Tua')
@@ -788,7 +788,8 @@ class AnggotaResource extends Resource
                         TextInput::make('tahun_mulai')->numeric(),
                         TextInput::make('tahun_selesai')->numeric(),
                     ])
-                    ->columns(2),
+                    ->columns(2)
+                    ->addActionLabel('Tambah Pengalaman'),
             ]),
         
         Section::make('Aktivitas Sosial')
@@ -804,7 +805,8 @@ class AnggotaResource extends Resource
                         TextInput::make('tahun_mulai')->numeric(),
                         TextInput::make('tahun_selesai')->numeric(),
                     ])
-                    ->columns(2),
+                    ->columns(2)
+                    ->addActionLabel('Tambah Aktivitas'),
             ]),
 
         Section::make('Pekerjaan')
@@ -814,7 +816,7 @@ class AnggotaResource extends Resource
                     ->relationship('pekerjaans')
                     ->defaultItems(0)
                     ->schema([
-                        Select::make('profesi')
+                        Select::make('profesi_id')
                         ->label('Profesi')
                         ->relationship('profesi', 'name')
                         ->required()
@@ -832,7 +834,8 @@ class AnggotaResource extends Resource
                         TextInput::make('tahun_mulai')->numeric(),
                         TextInput::make('tahun_selesai')->numeric(),
                     ])
-                    ->columns(2),
+                    ->columns(2)
+                    ->addActionLabel('Tambah Pekerjaan'),
             ])
         ];
     }

@@ -34,6 +34,7 @@ class ImportAnggota extends Page
     protected static ?string $navigationLabel = 'Import Data Jemaat';
     protected static ?int $navigationSort = 7;
     protected static string $view = 'filament.pages.import-anggota';
+    protected static bool $shouldRegisterNavigation = false;
 
     // public $organization_id;
     // public $status_jemaat;
