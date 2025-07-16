@@ -127,6 +127,9 @@ class EditAnggotaKeluarga extends Page implements HasForms
         ];
 
         // Simpan Ayah
+        if (empty($data['ayah']['nia']) && empty($data['ayah']['nama'])) {
+            $this->record->ayah()?->delete();
+        }
         if(!empty($data['ayah']['nama'])) {
             $ayah = $this->record->ayah()->updateOrCreate(
                 ['hubungan' => 'ayah'],
@@ -151,6 +154,9 @@ class EditAnggotaKeluarga extends Page implements HasForms
         }
 
         // Simpan Ibu
+        if (empty($data['ibu']['nia']) && empty($data['ibu']['nama'])) {
+            $this->record->ibu()?->delete();
+        }
         if(!empty($data['ibu']['nama'])) {
             $ibu = $this->record->ibu()->updateOrCreate(
                 ['hubungan' => 'ibu'],
@@ -174,10 +180,18 @@ class EditAnggotaKeluarga extends Page implements HasForms
             }
         }
 
+        if (empty($data['pasangan']) || (empty($data['pasangan']['nama']) && empty($data['pasangan']['nia'])) ) {
+            $isLaki = $this->record->jenis_kelamin === 'Laki-laki';
+
+            Pernikahan::where(
+                $isLaki ? 'anggota_id_suami' : 'anggota_id_istri',
+                $this->record->id
+            )->delete();
+        }
         if (
             !empty($data['pasangan']) && 
-                filled($data['pasangan']['nama']) &&
-                filled($data['pasangan']['no_akta_nikah'])
+                filled($data['pasangan']['nama']) 
+                // && filled($data['pasangan']['no_akta_nikah'])
         ) {
             $isLaki = $this->record->jenis_kelamin === 'Laki-laki';
 
@@ -255,6 +269,10 @@ class EditAnggotaKeluarga extends Page implements HasForms
                 // Log::debug($bindAnakAnggota);
                 \App\Models\Anak::create($bindAnakAnggota);
             }
+        } else {
+            \App\Models\Anak::where('ayah_id', $this->record->id)
+                ->orWhere('ibu_id', $this->record->id)
+                ->delete();
         }
 
         Notification::make()
