@@ -252,7 +252,7 @@ class EditAnggotaKeluarga extends Page implements HasForms
                         $bindAnakAnggota['anggota_id'] = $anakAnggota->id;
                     }
                 }
-                Log::debug($bindAnakAnggota);
+                // Log::debug($bindAnakAnggota);
                 \App\Models\Anak::create($bindAnakAnggota);
             }
         }
