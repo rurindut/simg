@@ -28,7 +28,7 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login(
-                // \App\Filament\Pages\Auth\Login::class,
+                \App\Filament\Pages\Auth\Login::class,
             )
             ->colors([
                 'primary' => Color::Amber,
@@ -60,6 +60,7 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ])
+            ->brandName('Sistem Informasi Manajemen Gereja')
             ->databaseNotifications();
     }
 }
