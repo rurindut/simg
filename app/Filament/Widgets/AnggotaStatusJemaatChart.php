@@ -12,7 +12,7 @@ class AnggotaStatusJemaatChart extends ChartWidget
 
     protected function getData(): array
     {
-        $query = Anggota::query();
+        $query = Anggota::query()->where('status_hidup', 'hidup');
 
         if (!Auth::user()->hasRole('super_admin')) {
             $query->where('organization_id', Auth::user()->organization_id);
