@@ -6,6 +6,10 @@ use App\Models\Anggota;
 use App\Models\Atestasi;
 use Filament\Pages\Page;
 use Filament\Tables;
+use Filament\Tables\Filters\QueryBuilder;
+use Filament\Tables\Filters\QueryBuilder\Constraints\SelectConstraint;
+use Filament\Tables\Filters\QueryBuilder\Constraints\TextConstraint;
+use App\Filament\Filters\Constraints\UsiaConstraint;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Contracts\HasTable;
@@ -33,15 +37,24 @@ class AnggotaAtestasiPage extends Page implements HasTable
         return $table
             ->query($this->getQuery())
             ->columns([
-                TextColumn::make('anggota.nia')->label('NIA'),
-                TextColumn::make('anggota.nama')->label('Nama Lengkap')->sortable(),
-                TextColumn::make('anggota.nomor_hp')->label('No. HP')->sortable(),
+                TextColumn::make('anggota.nia')
+                    ->label('NIA')
+                    ->searchable(),
+                TextColumn::make('anggota.nama')
+                    ->label('Nama Lengkap')
+                    ->sortable()
+                    ->searchable(),
+                TextColumn::make('anggota.nomor_hp')
+                    ->label('No. HP')
+                    ->searchable(),
                 TextColumn::make('anggota.region.name')
                     ->label('Wilayah')
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('anggota.cluster.name')
                     ->label('Kelompok')
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('keluarga')
                     ->label('Keluarga')
                     ->getStateUsing(function ($record) {
@@ -59,7 +72,8 @@ class AnggotaAtestasiPage extends Page implements HasTable
                         'simpatisan' => 'warning',
                         default => 'gray',
                     })
-                    ->sortable(),
+                    ->sortable()
+                    ->searchable(),
                 TextColumn::make('anggota.usia')
                     ->label('Usia')
                     ->getStateUsing(function ($record) {
@@ -67,8 +81,56 @@ class AnggotaAtestasiPage extends Page implements HasTable
                         return $anggota->tanggal_lahir
                             ? \Carbon\Carbon::parse($anggota->tanggal_lahir)->age . ' tahun'
                             : '-';
-                    }),
+                    })
+                    ->sortable(query: fn ($query, string $direction) =>
+                        $query->orderByRaw("
+                            (SELECT TIMESTAMPDIFF(YEAR, a.tanggal_lahir, CURDATE())
+                            FROM anggotas a
+                            WHERE a.id = atestasis.anggota_id) {$direction}
+                        ")),
             ])
+            ->filters([
+                QueryBuilder::make()
+                ->constraints([
+                    TextConstraint::make('anggota.nia')
+                        ->label('NIA'),
+                    TextConstraint::make('anggota.nama')
+                        ->label('Nama Lengkap'),
+                    TextConstraint::make('anggota.nomor_hp')
+                        ->label('No. HP'),
+                    SelectConstraint::make('anggota.status_jemaat')
+                        ->label('Status Jemaat')
+                        ->options([
+                            'anggota' => 'Anggota',
+                            'simpatisan' => 'Simpatisan',
+                        ]),
+                    SelectConstraint::make('anggota.jenis_kelamin')
+                        ->label('Jenis Kelamin')
+                        ->options([
+                            'laki-laki' => 'Laki-laki',
+                            'perempuan' => 'Perempuan',
+                        ]),
+                    
+                    TextConstraint::make('anggota.region.name')
+                        ->label('Wilayah'),
+                    
+                    TextConstraint::make('anggota.cluster.name')
+                        ->label('Kelompok'),
+
+                    UsiaConstraint::make('anggota.tanggal_lahir'),
+                ])
+                ->constraintPickerColumns(2),
+            ])
+            ->filtersLayout(Tables\Enums\FiltersLayout::AboveContentCollapsible)
+            ->filtersFormWidth('7xl')
+            ->filtersTriggerAction(
+                fn (Tables\Actions\Action $action) => $action
+                    ->button()
+                    ->label('Filters')
+                    ->icon('heroicon-m-funnel')
+                    ->color('gray')
+                    ->size('sm')
+            )
             ->actions([
                 Tables\Actions\EditAction::make()
                     ->url(fn ($record) => AnggotaResource::getUrl('edit', ['record' => $record->anggota_id]))
@@ -82,6 +144,7 @@ class AnggotaAtestasiPage extends Page implements HasTable
             if (! auth()->user()?->is_super_admin) {
                 $query->where('organization_id', auth()->user()->organization_id);
             }
+            $query->where('status_hidup', 'hidup');
         });
     }
 

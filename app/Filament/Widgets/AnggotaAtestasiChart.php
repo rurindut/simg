@@ -16,6 +16,7 @@ class AnggotaAtestasiChart extends ChartWidget
             if (! auth()->user()?->is_super_admin) {
                 $query->where('organization_id', auth()->user()->organization_id);
             }
+            $query->where('status_hidup', 'hidup');
         });
 
         $atestasiData = [

@@ -35,9 +35,17 @@ class AnggotaMeninggalPage extends Page implements HasTable
         return $table
             ->query($this->getQuery())
             ->columns([
-                TextColumn::make('nia')->label('NIA'),
-                TextColumn::make('nama')->label('Nama Lengkap')->sortable(),
-                TextColumn::make('nomor_hp')->label('No. HP')->sortable(),
+                TextColumn::make('nia')
+                    ->label('NIA')
+                    ->searchable(),
+                TextColumn::make('nama')
+                    ->label('Nama Lengkap')
+                    ->sortable()
+                    ->searchable(),
+                TextColumn::make('nomor_hp')
+                    ->label('No. HP')
+                    ->sortable()
+                    ->searchable(),
                 TextColumn::make('region.name')
                     ->label('Wilayah')
                     ->searchable(),
@@ -61,7 +69,8 @@ class AnggotaMeninggalPage extends Page implements HasTable
                         'simpatisan' => 'warning',
                         default => 'gray',
                     })
-                    ->sortable(),
+                    ->sortable()
+                    ->searchable(),
             ])
             ->actions([
                 Tables\Actions\EditAction::make()

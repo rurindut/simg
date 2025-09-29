@@ -81,16 +81,26 @@ class ClusterResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->sortable()
-                    ->searchable(),
+                    ->searchable(query: function (Builder $query, string $search) {
+                        return $query->where('clusters.name', 'like', "%{$search}%");
+                    }),
                 Tables\Columns\TextColumn::make('region.name')
                     ->label('Wilayah')
                     ->sortable()
-                    ->searchable(),
+                    ->searchable(query: function (Builder $query, string $search) {
+                        return $query->whereHas('region', fn ($q) => 
+                            $q->where('regions.name', 'like', "%{$search}%")
+                        );
+                    }),
                 Tables\Columns\TextColumn::make('organization.name')
                     ->label('Organisasi')
                     ->sortable()
                     ->visible($isSuperAdmin)
-                    ->searchable(),
+                    ->searchable(query: function (Builder $query, string $search) {
+                        return $query->whereHas('organization', fn ($q) => 
+                            $q->where('organizations.name', 'like', "%{$search}%")
+                        );
+                    }),
             ])
             ->filters([
                 //
@@ -142,15 +152,16 @@ class ClusterResource extends Resource
     {
         $user = auth()->user();
 
-        if ($user?->is_super_admin) {
-            return parent::getEloquentQuery()->with(['region']);
+        $query = parent::getEloquentQuery()
+            ->with(['region', 'organization']);
+
+        if (! $user?->is_super_admin) {
+            $query->whereHas('region', function ($q) use ($user) {
+                $q->where('organization_id', $user->organization_id);
+            });
         }
 
-        return parent::getEloquentQuery()
-            ->whereHas('region', function ($query) use ($user) {
-                $query->where('organization_id', $user->organization_id);
-            })
-            ->with(['region']);
+        return $query;
     }
 
     public static function canViewAny(): bool

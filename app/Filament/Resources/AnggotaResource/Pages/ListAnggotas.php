@@ -6,6 +6,7 @@ use App\Filament\Resources\AnggotaResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 use App\Filament\Exports\AnggotaExporter;
+use Illuminate\Database\Eloquent\Builder;
 
 class ListAnggotas extends ListRecords
 {
@@ -22,5 +23,11 @@ class ListAnggotas extends ListRecords
                     ->color('success')
                     ->exporter(AnggotaExporter::class),
         ];
+    }
+
+    protected function getTableQuery(): Builder
+    {
+        return parent::getTableQuery()
+            ->where('status_hidup', 'hidup');
     }
 }

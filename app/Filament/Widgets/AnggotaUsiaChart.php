@@ -12,7 +12,7 @@ class AnggotaUsiaChart extends ChartWidget
 
     protected function getData(): array
     {
-        $query = Anggota::query();
+        $query = Anggota::query()->where('status_hidup', 'hidup');
 
         // Filter jika bukan super admin
         if (!Auth::user()->hasRole('super_admin')) {

@@ -9,6 +9,11 @@ use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Filters\QueryBuilder;
+use Filament\Tables\Filters\QueryBuilder\Constraints\Constraint;
+use Filament\Tables\Filters\QueryBuilder\Constraints\NumberConstraint;
+use Filament\Tables\Filters\QueryBuilder\Constraints\SelectConstraint;
+use Filament\Tables\Filters\QueryBuilder\Constraints\TextConstraint;
 use Filament\Tables\Table;
 use Filament\Tables\Actions\Action as TableAction;
 use Illuminate\Database\Eloquent\Builder;
@@ -34,6 +39,7 @@ use Filament\Forms\Get;
 use App\Models\Kota;
 // use Filament\Actions\Imports\ImportAction;
 // use App\Filament\Imports\AnggotaImporter;
+use App\Filament\Filters\Constraints\UsiaConstraint;
 
 class AnggotaResource extends Resource
 {
@@ -69,11 +75,13 @@ class AnggotaResource extends Resource
 
                 TextColumn::make('region.name')
                     ->label('Wilayah')
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable(),
 
                 TextColumn::make('cluster.name')
                     ->label('Kelompok')
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable(),
 
                 TextColumn::make('keluarga')
                     ->label('Keluarga')
@@ -89,6 +97,11 @@ class AnggotaResource extends Resource
                         return $record->tanggal_lahir
                             ? \Carbon\Carbon::parse($record->tanggal_lahir)->age . ' tahun'
                             : '-';
+                    })
+                    ->sortable(query: function ($query, string $direction) {
+                        return $query->orderByRaw(
+                            "TIMESTAMPDIFF(YEAR, tanggal_lahir, CURDATE()) {$direction}"
+                        );
                     }),
 
                 TextColumn::make('status_jemaat')
@@ -109,23 +122,47 @@ class AnggotaResource extends Resource
             ])
             ->defaultSort('nama')
             ->filters([
-                Tables\Filters\Filter::make('usia')
-                ->form([
-                    Forms\Components\TextInput::make('min')->label('Usia Min')->numeric(),
-                    Forms\Components\TextInput::make('max')->label('Usia Max')->numeric(),
+                QueryBuilder::make()
+                ->constraints([
+                    TextConstraint::make('nia')
+                        ->label('NIA'),
+                    TextConstraint::make('nama')
+                        ->label('Nama Lengkap'),
+                    TextConstraint::make('nomor_hp')
+                        ->label('No. HP'),
+                    SelectConstraint::make('status_jemaat')
+                        ->label('Status Jemaat')
+                        ->options([
+                            'anggota' => 'Anggota',
+                            'simpatisan' => 'Simpatisan',
+                        ]),
+                    SelectConstraint::make('jenis_kelamin')
+                        ->label('Jenis Kelamin')
+                        ->options([
+                            'laki-laki' => 'Laki-laki',
+                            'perempuan' => 'Perempuan',
+                        ]),
+                    
+                    TextConstraint::make('region.name')
+                        ->label('Wilayah'),
+                    
+                    TextConstraint::make('cluster.name')
+                        ->label('Kelompok'),
+
+                    UsiaConstraint::make('tanggal_lahir'),
                 ])
-                ->query(function (Builder $query, array $data) {
-                    if ($data['min']) {
-                        $query->whereDate('tanggal_lahir', '<=', now()->subYears($data['min'])->toDateString());
-                    }
-
-                    if ($data['max']) {
-                        $query->whereDate('tanggal_lahir', '>=', now()->subYears($data['max'] + 1)->addDay()->toDateString());
-                    }
-
-                    return $query;
-                }),
+                ->constraintPickerColumns(2),
             ])
+            ->filtersLayout(Tables\Enums\FiltersLayout::AboveContentCollapsible)
+            ->filtersFormWidth('7xl')
+            ->filtersTriggerAction(
+                fn (Tables\Actions\Action $action) => $action
+                    ->button()
+                    ->label('Filters')
+                    ->icon('heroicon-m-funnel')
+                    ->color('gray')
+                    ->size('sm')
+            )
             ->actions([
                 Tables\Actions\ViewAction::make()->label('Detail'),
                 Tables\Actions\EditAction::make(),
